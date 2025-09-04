@@ -1,0 +1,81 @@
+# =========================
+# Archivos de Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+
+# =========================
+# Entornos virtuales
+# =========================
+.env
+.venv
+env/
+venv/
+ENV/
+*.env
+
+# =========================
+# Archivos de configuración locales
+# =========================
+*.DS_Store
+*.idea/
+.vscode/
+*.log
+
+# =========================
+# Salidas de Jupyter/Colab
+# =========================
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# =========================
+# Archivos de datos y resultados pesados
+# =========================
+data/
+datasets/
+*.csv
+*.tsv
+*.json
+*.xlsx
+*.parquet
+*.h5
+*.pth
+*.pt
+*.pickle
+*.pkl
+*.joblib
+
+# =========================
+# Modelos entrenados
+# =========================
+models/
+checkpoints/
+outputs/
+runs/
+
+# =========================
+# Archivos de compilación / cache
+# =========================
+build/
+dist/
+*.manifest
+*.spec
+
+# =========================
+# Librerías y dependencias
+# =========================
+*.lock
+Pipfile.lock
+poetry.lock
+
+# =========================
+# Archivos de sistema
+# =========================
+Thumbs.db
+.DS_Store
