@@ -67,3 +67,29 @@ pip install numpy
 # Librerías para grafos
 pip install networkx pygraphvizV
 ```
+
+## Approach
+
+1. **Extraction**
+```sh
+python 1_extract_data.py # write data in csvs 
+```
+
+2. **Embeddings Generation and Build Graph**
+```sh
+python 2_estructural_embeddings.py # CodeBERT and Similarity Matrix
+python 2_functional_embeddings.py # MPNet and Similarity Matrix
+python 2_semantic_embeddings.py # MPNet and Similarity Matrix
+```
+
+3. **Multiview Mapping and Self-Weighted Fusion**
+```sh
+python 3_fusion.py # fusion of matrix
+```
+
+4. **Clustering**
+```sh
+python 4_clustering.py # Kmeans
+```
+
+<!-- 5. **Evaluation** -->
