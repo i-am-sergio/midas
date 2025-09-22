@@ -88,3 +88,6 @@ monoliths/acmeair
 monoliths/jPetStore
 monoliths/sample.daytrader7
 monoliths/sample.plantsbywebsphere
+
+# preprocessing_[].py
+v1/results

@@ -93,3 +93,6 @@ python 4_clustering.py # Kmeans
 ```
 
 <!-- 5. **Evaluation** -->
+
+Color Matriz
+

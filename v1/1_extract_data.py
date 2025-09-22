@@ -2,7 +2,6 @@ import javalang
 import os
 import csv
 import requests
-import json
 import re
 from typing import List, Dict, Any, Tuple
 
@@ -279,19 +278,21 @@ def extract_semantic_data(input_csv: str, output_csv: str = "semantic_data.csv")
 # EJECUCIÓN PRINCIPAL
 # =============================================================================
 if __name__ == "__main__":
+    OUTPUT_PATH = "results"
     print("Iniciando fase 1: Extracción de datos...")
+
+    # Crear carpeta si no existe
+    os.makedirs(OUTPUT_PATH, exist_ok=True)
     
     # 1. Extracción Estructural (Java)
-    project_path = "monoliths/jPetStore/src"
-    parse_java_project(project_path, "estructural_data.csv")
+    project_path = "../monoliths/jPetStore/src"
+    parse_java_project(project_path, "results/data_estructural.csv")
     
     # 2. Extracción Funcional (OpenAPI)
     api_url = "https://petstore3.swagger.io/api/v3/openapi.json"
-    extract_functional_data(api_url, "functional_data.csv")
+    extract_functional_data(api_url, "results/data_functional.csv")
     
-    # 3. Extracción Semántica (Casos de Uso)
-    # Asume que existe un archivo 'use_cases.csv' con una columna de casos de uso
-    extract_semantic_data("use_cases.csv", "semantic_data.csv")
+    extract_semantic_data("use_cases.csv", "results/data_semantic.csv")
     
     print("Fase 1 completada. Archivos generados:")
     print("- estructural_data.csv")
