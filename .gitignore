@@ -39,7 +39,7 @@ ENV/
 # =========================
 data/
 datasets/
-*.csv
+# *.csv
 *.tsv
 *.json
 *.xlsx
@@ -88,6 +88,8 @@ monoliths/acmeair
 monoliths/jPetStore
 monoliths/sample.daytrader7
 monoliths/sample.plantsbywebsphere
+
+dataset
 
 # preprocessing_[].py
 v1/results

@@ -292,7 +292,7 @@ if __name__ == "__main__":
     api_url = "https://petstore3.swagger.io/api/v3/openapi.json"
     extract_functional_data(api_url, "results/data_functional.csv")
     
-    extract_semantic_data("use_cases.csv", "results/data_semantic.csv")
+    extract_semantic_data("jpetstore_use_cases.csv", "results/data_semantic.csv")
     
     print("Fase 1 completada. Archivos generados:")
     print("- estructural_data.csv")
