@@ -94,3 +94,10 @@ dataset
 # preprocessing_[].py
 v1/results
 v2/results
+
+# executables
+v2/extract_structural_view 
+v2/analyze_relations 
+v2/extract_functional_view
+v2/extract_semantic_view
+v2/filter
