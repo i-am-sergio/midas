@@ -25,6 +25,54 @@ private:
     std::filesystem::path inputDirectory_;
     std::ofstream outputFile_;
 
+    /**
+     * Filtra clases de infraestructura (Controladores, Acciones, DAO Impl., etc.)
+     * Devuelve 'true' si la clase debe ser IGNORADA.
+     */
+    bool isClassFiltered(const std::filesystem::path& filePath) {
+        std::string pathString = filePath.string();
+        std::replace(pathString.begin(), pathString.end(), '\\', '/');
+
+        // --- Filtros de Paquete (Infraestructura de persistencia/servicio) ---
+        const std::vector<std::string> pathFilters = {
+            "dao/ibatis",     // Implementaciones de iBatis DAO
+            "service/client"  // Clases de cliente de servicio
+        };
+        for (const auto& filter : pathFilters) {
+            if (pathString.find(filter) != std::string::npos) {
+                // std::cout << "Filtrando (path): " << pathString << std::endl;
+                return true; // Ignorar
+            }
+        }
+
+        // --- Filtros de Nombre de Archivo (Infraestructura Web/Controladores) ---
+        std::string filename = filePath.filename().string();
+        const std::vector<std::string> suffixFilters = {
+            "Controller.java", // Controladores Spring MVC
+            "Action.java",     // Acciones Struts (EJ: ViewCartAction.java)
+            "Interceptor.java" // Interceptores Spring
+        };
+        for (const auto& suffix : suffixFilters) {
+            // Comprobar si el nombre de archivo termina con el sufijo
+            if (filename.size() >= suffix.size() && 
+                filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+                
+                // Excepción: No filtrar 'BaseAction.java' o 'SecureBaseAction.java' si las consideras parte del núcleo
+                if (filename == "BaseAction.java" || filename == "SecureBaseAction.java") {
+                     // Comenta esta línea si SÍ quieres filtrar BaseAction
+                     return false;
+                }
+                
+                // std::cout << "Filtrando (suffix): " << filename << std::endl;
+                return true; // Ignorar
+            }
+        }
+        
+        return false; // No filtrar (incluir)
+    }
+
+    // ... (El resto de la clase JavaCodeExtractor no cambia) ...
+    
     void writeCsvHeader() {
         outputFile_ << "filename,class,attributes,methods\n";
     }
@@ -38,6 +86,11 @@ private:
     }
 
     void parseFile(const std::filesystem::path& filePath) {
+        // Aplicar el filtro de preprocesamiento según la tesis
+        if (isClassFiltered(filePath)) {
+             return; // Omitir esta clase
+        }
+
         std::ifstream fileStream(filePath);
         if (!fileStream.is_open()) {
             std::cerr << "Advertencia: No se pudo abrir el archivo " << filePath << std::endl;
@@ -142,16 +195,25 @@ int main(int argc, char* argv[]) {
     }
 
     std::filesystem::path inputPath(argv[1]);
-    if (!std::filesystem::exists(inputPath) || !std::filesystem::is_directory(inputPath)) {
-        std::cerr << "Error: La ruta proporcionada no existe o no es un directorio." << std::endl;
+    std::filesystem::path canonicalPath;
+
+    try {
+        canonicalPath = std::filesystem::canonical(inputPath);
+    } catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Error: La ruta proporcionada no es válida o no existe: " << e.what() << std::endl;
+        return 1;
+    }
+
+    if (!std::filesystem::is_directory(canonicalPath)) {
+        std::cerr << "Error: La ruta proporcionada no es un directorio." << std::endl;
         return 1;
     }
     
-    std::string projectName = inputPath.filename().string();
+    std::string projectName = canonicalPath.filename().string();
     std::string outputFilename = "results/"+projectName + "_fase1.csv";
 
     try {
-        JavaCodeExtractor extractor(inputPath, outputFilename);
+        JavaCodeExtractor extractor(canonicalPath, outputFilename);
         extractor.run();
         std::cout << "Proceso completado. Resultados guardados en: " << outputFilename << std::endl;
     } catch (const std::exception& e) {

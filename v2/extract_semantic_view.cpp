@@ -25,6 +25,51 @@ private:
     std::filesystem::path inputDirectory_;
     std::ofstream outputFile_;
 
+    /**
+     * Filtra clases de infraestructura (Controladores, Acciones, DAO Impl., etc.)
+     * Devuelve 'true' si la clase debe ser IGNORADA.
+     */
+    bool isClassFiltered(const std::filesystem::path& filePath) {
+        std::string pathString = filePath.string();
+        std::replace(pathString.begin(), pathString.end(), '\\', '/');
+
+        // --- Filtros de Paquete (Infraestructura de persistencia/servicio) ---
+        const std::vector<std::string> pathFilters = {
+            "dao/ibatis",     // Implementaciones de iBatis DAO
+            "service/client"  // Clases de cliente de servicio
+        };
+        for (const auto& filter : pathFilters) {
+            if (pathString.find(filter) != std::string::npos) {
+                return true; // Ignorar
+            }
+        }
+
+        // --- Filtros de Nombre de Archivo (Infraestructura Web/Controladores) ---
+        std::string filename = filePath.filename().string();
+        const std::vector<std::string> suffixFilters = {
+            "Controller.java", // Controladores Spring MVC
+            "Action.java",     // Acciones Struts (EJ: ViewCartAction.java)
+            "Interceptor.java" // Interceptores Spring
+        };
+        for (const auto& suffix : suffixFilters) {
+            // Comprobar si el nombre de archivo termina con el sufijo
+            if (filename.size() >= suffix.size() && 
+                filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+                
+                // Excepción: No filtrar 'BaseAction.java' o 'SecureBaseAction.java' si las consideras parte del núcleo
+                if (filename == "BaseAction.java" || filename == "SecureBaseAction.java") {
+                     return false;
+                }
+                
+                return true; // Ignorar
+            }
+        }
+        
+        return false; // No filtrar (incluir)
+    }
+
+    // ... (El resto de la clase SemanticCollector no cambia) ...
+
     void writeCsvHeader() {
         outputFile_ << "class_name,concatenated_text\n";
     }
@@ -38,6 +83,11 @@ private:
     }
 
     void parseFile(const std::filesystem::path& filePath) {
+        // Aplicar el filtro de preprocesamiento según la tesis
+        if (isClassFiltered(filePath)) {
+             return; // Omitir esta clase
+        }
+
         std::ifstream fileStream(filePath);
         if (!fileStream.is_open()) {
             std::cerr << "Advertencia: No se pudo abrir el archivo " << filePath << std::endl;
@@ -90,7 +140,6 @@ private:
 
     std::vector<std::string> findAttributeNames(const std::string& content) {
         std::vector<std::string> names;
-        // Captura el tipo (grupo 1) y el nombre (grupo 2) de un atributo
         std::regex attributeRegex(R"((?:private|public|protected|static|final|\s)*\s*([a-zA-Z0-9_<>\[\]\.]+)\s+([a-zA-Z0-9_]+)\s*(?:=\s*[^;]*)?;)");
         
         size_t classBodyStart = content.find('{');
@@ -108,7 +157,6 @@ private:
             if(lastNewline != std::string::npos) {
                 line = line.substr(lastNewline + 1);
             }
-            // Heurística simple: si la línea no contiene paréntesis, es probable que sea un atributo y no un método
             if (line.find('(') == std::string::npos && line.find(')') == std::string::npos) {
                  names.push_back(match[2].str()); // Captura solo el nombre
             }
@@ -118,7 +166,6 @@ private:
 
     std::vector<std::string> findMethodNames(const std::string& content) {
         std::vector<std::string> names;
-        // Captura el tipo de retorno (grupo 1) y el nombre del método (grupo 2)
         std::regex methodRegex(R"((?:(?:public|private|protected|static|final|abstract|synchronized)\s+)*([a-zA-Z0-9_<>\[\].]+)\s+([a-zA-Z0-9_]+)\s*\([^)]*\)\s*(?:throws\s+[\w\s,.]*)?\s*(?:\{|;))");
         
         auto words_begin = std::sregex_iterator(content.begin(), content.end(), methodRegex);
@@ -155,7 +202,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::filesystem::path inputPath(argv[1]);
-    std::filesystem::path canonicalPath; 
+    std::filesystem::path canonicalPath;
 
     try {
         canonicalPath = std::filesystem::canonical(inputPath);
@@ -170,10 +217,10 @@ int main(int argc, char* argv[]) {
     }
     
     std::string projectName = canonicalPath.filename().string();
-    std::string outputFilename = "results/"+projectName + "_fase1_semantic_view.csv";
+    std::string outputFilename = "results/" + projectName + "_fase1_semantic_view.csv";
 
     try {
-        SemanticCollector collector(canonicalPath, outputFilename); 
+        SemanticCollector collector(canonicalPath, outputFilename);
         collector.run();
         std::cout << "Proceso completado. Vista semántica guardada en: " << outputFilename << std::endl;
     } catch (const std::exception& e) {
