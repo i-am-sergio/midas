@@ -47,7 +47,7 @@ echo "---------- FASE 2: Preprocessing and Matrix Generation ----------"
 
 
 
-# La lista de 24 clases que usará el script es:
+# clases: 72
 
 # Account
 # AccountActionForm
