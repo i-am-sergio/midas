@@ -107,3 +107,5 @@ v3/analyze_relations
 v3/extract_functional_view
 v3/extract_semantic_view
 v3/filter
+
+**/jpetstore_results/**
