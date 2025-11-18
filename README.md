@@ -70,7 +70,78 @@ pip install networkx pygraphvizV
 
 ## Approach
 
-1. **Extraction**
+### Q1: Complete Approach 
+
+```sh
+# FASE 1: Extraction 
+python extract_structural_view.py ../monoliths/jPetStore/ jpetstore_results/
+python analyze_relations.py jpetstore_results/structural_view.csv ../monoliths/jPetStore/ jpetstore_results/jPetStore_fase1_structural_view.csv
+# FASE 2: Preprocessing and Build Matrices
+python preprocessing_structural.py jpetstore_results/jPetStore_fase1_structural_view.csv jpetstore_results/jPetStore_fase2_structural_view_filtered.csv
+python build_structural_matrix.py jpetstore_results/jPetStore_fase2_structural_view_filtered.csv jpetstore_results/jpetstore_structural
+# FASE 3: Multiview Fusion
+python self_weighted_fusion.py jpetstore_results/jpetstore_structural_matrix.csv jpetstore_results/jpetstore_fused_matrix.csv
+# FASE 4: Clustering
+python optimize_k_spectral.py jpetstore_results/jpetstore_structural_matrix.csv jpetstore_results/spectral_clustering_results
+# FASE 5: Evaluation
+python calculate_metrics.py jpetstore_results/spectral_clustering_results/k_5.json jpetstore_results/jPetStore_fase2_structural_view_filtered.csv
+```
+
+```sh
+# Ejecutar para cada monolito
+./midas.sh acmeair
+./midas.sh jpetstore
+./midas.sh daytrader
+./midas.sh plants
+./midas.sh jrideconnect
+```
+
+
+### Q2: Evaluation of monoview versions of MIDAS
+- **MIDAS-Str**
+
+```sh
+# Ejecutar para cada monolito
+./midas_str.sh acmeair
+./midas_str.sh jpetstore
+./midas_str.sh daytrader
+./midas_str.sh plants
+./midas_str.sh jrideconnect
+```
+- **MIDAS-Sem**
+
+```sh
+# Ejecutar para cada monolito
+./midas_sem.sh acmeair
+./midas_sem.sh jpetstore
+./midas_sem.sh daytrader
+./midas_sem.sh plants
+./midas_sem.sh jrideconnect
+```
+
+- **MIDAS-Fun**
+
+```sh
+# Ejecutar para cada monolito
+./midas_fun.sh acmeair
+./midas_fun.sh jpetstore
+./midas_fun.sh daytrader
+./midas_fun.sh plants
+./midas_fun.sh jrideconnect
+```
+
+### Q3: Best weighted combination of views
+
+```sh
+# Ejecutar para cada monolito
+./midas_weighted.sh acmeair
+./midas_weighted.sh jpetstore
+./midas_weighted.sh daytrader
+./midas_weighted.sh plants
+./midas_weighted.sh jrideconnect
+```
+
+<!-- 1. **Extraction**
 ```sh
 python 1_extract_data.py # write data in csvs 
 ```
@@ -93,6 +164,3 @@ python 4_clustering.py # Kmeans
 ```
 
 <!-- 5. **Evaluation** -->
-
-Color Matriz
-
