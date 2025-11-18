@@ -1,0 +1,73 @@
+class,relations
+Account,{}
+AccountActionForm,"{'BaseActionForm': 15, 'Account': 5}"
+AccountDao,{'Account': 3}
+AccountForm,{'Account': 13}
+AccountFormController,"{'PetStoreFacade': 5, 'UserSession': 8, 'AccountForm': 16}"
+AccountValidator,{}
+AddItemToCartAction,{'BaseAction': 15}
+AddItemToCartController,{'PetStoreFacade': 5}
+BaseAction,{'PetStoreFacade': 5}
+BaseActionForm,{}
+Cart,"{'Item': 3, 'CartItem': 8}"
+CartActionForm,"{'BaseActionForm': 15, 'Cart': 13}"
+CartItem,{'Item': 5}
+Category,{}
+CategoryDao,{'Category': 3}
+DoNothingAction,{'BaseAction': 15}
+EditAccountAction,{'SecureBaseAction': 15}
+EditAccountFormAction,{'SecureBaseAction': 15}
+Item,{'Product': 5}
+ItemDao,"{'Item': 3, 'Order': 3}"
+JaxRpcOrderService,"{'OrderService': 5, 'Order': 3}"
+LineItem,{'Item': 5}
+ListOrdersAction,{'SecureBaseAction': 15}
+ListOrdersController,{'PetStoreFacade': 5}
+MsSqlOrderDao,"{'SqlMapOrderDao': 15, 'Order': 3}"
+NewAccountAction,{'BaseAction': 15}
+NewAccountFormAction,"{'BaseAction': 15, 'AccountActionForm': 8, 'Account': 8}"
+NewOrderAction,{'SecureBaseAction': 15}
+NewOrderFormAction,{'SecureBaseAction': 15}
+OracleSequenceDao,"{'SqlMapSequenceDao': 15, 'Sequence': 8}"
+Order,"{'LineItem': 11, 'CartItem': 3, 'Account': 3, 'Cart': 3}"
+OrderActionForm,"{'BaseActionForm': 15, 'Order': 13}"
+OrderDao,{'Order': 3}
+OrderForm,{'Order': 13}
+OrderFormController,"{'PetStoreFacade': 5, 'OrderForm': 8}"
+OrderService,{'Order': 3}
+OrderServiceClient,{'Order': 3}
+OrderValidator,{'Order': 3}
+PetStoreFacade,"{'Item': 3, 'Category': 3, 'Order': 3, 'Account': 3, 'Product': 3}"
+PetStoreImpl,"{'PetStoreFacade': 15, 'OrderService': 15, 'ProductDao': 5, 'Item': 3, 'CategoryDao': 5, 'Category': 3, 'AccountDao': 5, 'ItemDao': 5, 'OrderDao': 5, 'Order': 3, 'Account': 3, 'Product': 3}"
+Product,{}
+ProductDao,{'Product': 3}
+RemoveItemFromCartAction,{'BaseAction': 15}
+RemoveItemFromCartController,{}
+SearchProductsAction,{'BaseAction': 15}
+SearchProductsController,{'PetStoreFacade': 5}
+SecureBaseAction,{'BaseAction': 15}
+SendOrderConfirmationEmailAdvice,{}
+Sequence,{}
+SignoffController,{}
+SignonAction,"{'BaseAction': 15, 'AccountActionForm': 8}"
+SignonController,"{'PetStoreFacade': 5, 'UserSession': 8}"
+SignonInterceptor,{}
+SqlMapAccountDao,{'Account': 11}
+SqlMapCategoryDao,{'Category': 3}
+SqlMapItemDao,"{'Item': 3, 'Order': 3}"
+SqlMapOrderDao,"{'SqlMapSequenceDao': 5, 'Order': 3}"
+SqlMapProductDao,{'Product': 3}
+SqlMapSequenceDao,{'Sequence': 16}
+UpdateCartQuantitiesAction,{'BaseAction': 15}
+UpdateCartQuantitiesController,{}
+UserSession,{'Account': 5}
+ViewCartAction,{'BaseAction': 15}
+ViewCartController,{}
+ViewCategoryAction,{'BaseAction': 15}
+ViewCategoryController,{'PetStoreFacade': 5}
+ViewItemAction,{'BaseAction': 15}
+ViewItemController,{'PetStoreFacade': 5}
+ViewOrderAction,{'SecureBaseAction': 15}
+ViewOrderController,{'PetStoreFacade': 5}
+ViewProductAction,{'BaseAction': 15}
+ViewProductController,{'PetStoreFacade': 5}
