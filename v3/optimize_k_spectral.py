@@ -97,15 +97,16 @@ class SpectralClusterer:
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Uso: python optimize_k_spectral.py <INPUT_MATRIX_CSV>")
-        print("Ejemplo: python optimize_k_spectral.py jpetstore_structural_matrix.csv")
+    if len(sys.argv) != 3:
+        print("Uso: python optimize_k_spectral.py <INPUT_MATRIX_CSV> <OUTPUT_DIR>")
+        print("Ejemplo: python optimize_k_spectral.py jpetstore_structural_matrix.csv spectral_clustering_results")
         sys.exit(1)
 
     input_csv = sys.argv[1]
+    output_dir = sys.argv[2]
 
     # Definir rutas de salida
-    output_dir = "clustering_results_spectral"
+    # output_dir = "clustering_results_spectral"
     # scores_csv = "silhouette_scores_spectral.csv"
     scores_csv = os.path.join(output_dir, "silhouette_scores_spectral.csv")
 
