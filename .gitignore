@@ -88,8 +88,29 @@ monoliths/acmeair
 monoliths/jPetStore
 monoliths/sample.daytrader7
 monoliths/sample.plantsbywebsphere
+monoliths/jrideconnect
 
 dataset
 
 # preprocessing_[].py
 v1/results
+v2/results
+
+# executables
+v2/extract_structural_view 
+v2/analyze_relations 
+v2/extract_functional_view
+v2/extract_semantic_view
+v2/filter
+
+v3/extract_structural_view 
+v3/analyze_relations 
+v3/extract_functional_view
+v3/extract_semantic_view
+v3/filter
+
+**/jpetstore_results/**
+**/acmeair_results/**
+**/daytrader_results/**
+**/plants_results/**
+**/jrideconnect_results/**

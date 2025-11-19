@@ -1,0 +1,24 @@
+class,relations
+Account,{}
+AccountDao,{'Account': 3}
+Cart,"{'Item': 3, 'CartItem': 8}"
+CartItem,{'Item': 5}
+Category,{}
+CategoryDao,{'Category': 3}
+Item,{'Product': 5}
+ItemDao,"{'Item': 3, 'Order': 3}"
+LineItem,{'Item': 5}
+Order,"{'Account': 3, 'Cart': 3, 'LineItem': 11, 'CartItem': 3}"
+OrderDao,{'Order': 3}
+OrderService,{'Order': 3}
+PetStoreFacade,"{'Account': 3, 'Product': 3, 'Item': 3, 'Category': 3, 'Order': 3}"
+PetStoreImpl,"{'PetStoreFacade': 15, 'OrderService': 15, 'CategoryDao': 5, 'AccountDao': 5, 'ItemDao': 5, 'Account': 3, 'Product': 3, 'OrderDao': 5, 'Item': 3, 'ProductDao': 5, 'Category': 3, 'Order': 3}"
+Product,{}
+ProductDao,{'Product': 3}
+Sequence,{}
+SqlMapAccountDao,{'Account': 11}
+SqlMapCategoryDao,{'Category': 3}
+SqlMapItemDao,"{'Item': 3, 'Order': 3}"
+SqlMapOrderDao,"{'Order': 3, 'SqlMapSequenceDao': 5}"
+SqlMapProductDao,{'Product': 3}
+SqlMapSequenceDao,{'Sequence': 16}
