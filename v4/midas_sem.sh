@@ -60,6 +60,7 @@ echo "Maestro de clases de núcleo guardado en: $STRUCTURAL_CSV_FILTERED"
 
 # --- FASE 1: Semantic Extraction ---
 SEMANTIC_CSV_RAW="$RESULTS_DIR/${NOMBRE_MONOLITO}_fase1_semantic_view.csv"
+
 echo "[1/5] Extracción y Descomposición Léxica (Vista Semántica)..."
 # Usamos el CSV filtrado estructural como filtro de inclusión
 python extract_semantic_view.py "$SOURCE_DIR" "$STRUCTURAL_CSV_FILTERED" "$SEMANTIC_CSV_RAW"
@@ -79,7 +80,7 @@ python build_semantic_matrix.py "$SEMANTIC_CSV_CLEAN" "$SEMANTIC_MATRIX_BASE_NAM
 echo "[3/5] Fusión Multivista (Saltado - Solo Semántica)..."
 
 # --- FASE 4: Clustering ---
-SEMANTIC_CLUSTERING_DIR="$RESULTS_DIR/semantic_clustering_results"
+SEMANTIC_CLUSTERING_DIR="$RESULTS_DIR/semantic_spectral_clustering_results"
 echo "[4/5] Clustering Espectral (Optimizando K) sobre S^(sem)..."
 # Pasamos el directorio $RESULTS_DIR para que guarde ahí la carpeta clustering_results_semantic
 python optimize_k_spectral.py "$SEMANTIC_MATRIX_CSV" "$SEMANTIC_CLUSTERING_DIR"
@@ -97,6 +98,6 @@ else
 fi
 
 echo "=================================================="
-echo "MIDAS Semántico Completado."
+echo "MIDAS Semántico Completado [MIDAS-sem]"
 echo "Resultados en: $RESULTS_DIR"
 echo "=================================================="
