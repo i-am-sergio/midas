@@ -65,12 +65,11 @@ python build_structural_matrix.py "$RESULTS_DIR/${NOMBRE_MONOLITO}_fase2_structu
 
 # FASE 4: Clustering
 echo "FASE 4: Clustering"
-python optimize_k_spectral.py "$RESULTS_DIR/${NOMBRE_MONOLITO}_structural_matrix.csv" "$RESULTS_DIR/spectral_clustering_results"
+python optimize_k_spectral.py "$RESULTS_DIR/${NOMBRE_MONOLITO}_structural_matrix.csv" "$RESULTS_DIR/structural_spectral_clustering_results"
 
 # FASE 5: Evaluation
 echo "FASE 5: Evaluation"
-python calculate_metrics.py "$RESULTS_DIR/spectral_clustering_results/k_5.json" "$RESULTS_DIR/${NOMBRE_MONOLITO}_fase2_structural_view_filtered.csv"
-
+python calculate_metrics.py "$RESULTS_DIR/structural_spectral_clustering_results/k_5.json" "$RESULTS_DIR/${NOMBRE_MONOLITO}_fase2_structural_view_filtered.csv"
 echo "=================================================="
 echo "Proceso completado para: $NOMBRE_MONOLITO"
 echo "Resultados en: $RESULTS_DIR"
