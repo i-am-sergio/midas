@@ -1,20 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-Analiza las relaciones estructurales desde un CSV de vista estructural y
-los archivos fuente de Java.
-
-Uso:
-    python analyze_relations.py <input_path> <monolith_project> <output_path>
-
-Argumentos:
-    <input_path>:         Ruta al 'structural_view.csv' generado en la fase 1.
-    <monolith_project>:   Ruta al directorio raíz del proyecto monolítico. 
-                          (Requerido por paridad, aunque los paths del CSV 
-                           ya son completos).
-    <output_path>:        Ruta del archivo CSV donde se guardarán los resultados.
-"""
-
 import sys
 import os
 import csv

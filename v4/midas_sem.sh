@@ -86,7 +86,7 @@ echo "[4/5] Clustering Espectral (Optimizando K) sobre S^(sem)..."
 python optimize_k_spectral.py "$SEMANTIC_MATRIX_CSV" "$SEMANTIC_CLUSTERING_DIR"
 
 # --- FASE 5: Evaluation (Asumimos el mejor K por defecto o K=5 para comparación) ---
-BEST_K_JSON="$SEMANTIC_CLUSTERING_DIR/k_5.json"
+BEST_K_JSON="$SEMANTIC_CLUSTERING_DIR/clustering_results/k_5.json"
 
 echo "[5/5] Evaluación de Métricas (para K=5, usando relaciones estructurales)..."
 
