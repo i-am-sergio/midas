@@ -75,7 +75,7 @@ echo "  FASE 2: PREPROCESSING AND BUILD MATRIX (Normalization and Construction) 
 echo "=========================================================================="
 # 2.1 Matriz Estructural (A_str)
 echo "   -> [Estructural] Construyendo matriz estructural (A_str)"
-python fase2_build_structural_matrix.py "$STRUCTURAL_RAW/structural_view.csv" "$CORE_CLASSES_CSV" "$STR_MATRIX_BASE"
+python fase2_build_structural_matrix.py "$STRUCTURAL_CSV_RAW" "$CORE_CLASSES_CSV" "$STR_MATRIX_BASE"
 # 2.2 Matriz Semántica (A_sem)
 echo "   -> [Semántica] Construyendo matriz semántica (A_sem)"
 python fase2_build_semantic_matrix.py "$SEMANTIC_CSV_RAW" "$CORE_CLASSES_CSV" "$SEM_MATRIX_BASE"
