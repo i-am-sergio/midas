@@ -1,25 +1,46 @@
-#!/usr/bin/env python3
+# fase1_extract_core_classes.py
 
 import sys
 import os
 import csv
 import javalang
+import pandas as pd
 
-# Reglas de Filtrado
+# =============================================================================
+# REGLAS DE FILTRADO (JPetStore + AcmeAir + DayTrader + Plants)
+# =============================================================================
+
 FILTER_SUFFIXES = [
+    # JPetStore Ruido
     'Action', 'Form', 'Controller', 'Validator', 'Interceptor', 
-    'Client', 'Advice', 'Session', 'Servlet', 'Test'
+    'Client', 'Advice', 'Session', 'Servlet', 'Test',
+    # AcmeAir Ruido
+    'Test', 'Loader', 'Parser', 'Result', 'Results', 'Stats', 'Totals', 'Runner', 'Main',
+    'Config', 'Configuration', 'Constants', 'Factory', 'Manager', 'Locator', 'Generator',
+    'Helper', 'Util', 'Utils', 'Utility', 
 ]
 
 FILTER_PREFIXES = [
-    'Base', 'Secure', 'MsSql', 'Oracle', 'JaxRpc', 'Mock'
+    # JPetStore Ruido 
+    'Base', 'Secure', 'MsSql', 'Oracle', 'JaxRpc', 'Mock',
+    # AcmeAir Ruido 
+    'SQL', 'Mongo', 'WXS', 'Jmeter', 'Nmon', 'Rest', 'REST',
+    # DayTrader Ruido
+    'Ping',         # Elimina las ~50 clases de prueba de latencia (PingServlet, PingJDBC...)
+    # Plants Ruido
+    'Help', 'Populate'
 ]
+
 
 class CoreClassExtractor:
     def __init__(self, root_dir, output_all_csv, output_core_csv):
         self.root_dir = root_dir
         self.output_all_csv = output_all_csv
         self.output_core_csv = output_core_csv
+
+        # Diccionario para resolución de colisiones: { 'ClassName': row_data }
+        self.core_classes_map = {} 
+        self.all_rows_buffer = []
 
     @staticmethod
     def _get_method_signature(method_node):
@@ -85,47 +106,96 @@ class CoreClassExtractor:
         for prefix in FILTER_PREFIXES:
             if class_name.startswith(prefix): return False
         return True
+    
+    def _should_replace(self, current_path, new_path):
+        """
+        Determina si la nueva ruta es una implementación 'mejor' que la actual.
+        Prioridad: Morphia/Mongo > JPA > WXS/JDBC
+        """
+        curr = current_path.lower().replace('\\', '/')
+        new_p = new_path.lower().replace('\\', '/')
+        
+        # Prioridad 1: Morphia (MongoDB) es la implementación canónica en AcmeAir
+        if "morphia" in new_p and "morphia" not in curr:
+            return True
+        if "morphia" in curr:
+            return False
+            
+        # Prioridad 2: JPA sobre JDBC o WXS
+        if "jpa" in new_p and "jpa" not in curr:
+            return True
+            
+        # Si no hay preferencia clara, mantener el primero encontrado
+        return False
 
     def run(self):
-        print(f"Escaneando: {self.root_dir}")
+        print(f"Escaneando y resolviendo colisiones en: {self.root_dir}")
         
-        # Crear encabezados
+        files_scanned = 0
+        collisions_found = 0
+        
+        # PASO 1: Escaneo y Resolución en Memoria
+        for dirpath, _, filenames in os.walk(self.root_dir):
+            for filename in filenames:
+                if filename.endswith('.java'):
+                    full_path = os.path.join(dirpath, filename)
+                    rows = self._parse_java_file(full_path)
+                    
+                    for row in rows:
+                        self.all_rows_buffer.append(row) # Guardar todo para log
+                        
+                        class_name = row[1]
+                        
+                        # Solo procesar lógica de colisión si es Core
+                        if self._is_core_class(class_name):
+                            if class_name not in self.core_classes_map:
+                                # Nueva clase
+                                self.core_classes_map[class_name] = row
+                            else:
+                                # Colisión detectada
+                                collisions_found += 1
+                                existing_row = self.core_classes_map[class_name]
+                                existing_path = existing_row[0]
+                                new_path = row[0]
+                                
+                                if self._should_replace(existing_path, new_path):
+                                    # print(f"   [Reemplazo] {class_name}: {os.path.basename(os.path.dirname(existing_path))} -> {os.path.basename(os.path.dirname(new_path))}")
+                                    self.core_classes_map[class_name] = row
+                    
+                    files_scanned += 1
+                    if files_scanned % 50 == 0:
+                        print(f"... {files_scanned} archivos analizados", end='\r')
+
+        print(f"\n... Escaneo finalizado.")
+
+        # PASO 2: Escritura a Disco
         headers = ['filename', 'class', 'attributes', 'methods']
         
-        with open(self.output_all_csv, 'w', newline='', encoding='utf-8') as f_all, \
-             open(self.output_core_csv, 'w', newline='', encoding='utf-8') as f_core:
-            
-            writer_all = csv.writer(f_all)
-            writer_core = csv.writer(f_core)
-            
-            writer_all.writerow(headers)
-            writer_core.writerow(headers)
-            
-            total_count = 0
-            core_count = 0
+        # CSV ALL (Sin filtrar, con duplicados)
+        with open(self.output_all_csv, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            writer.writerows(self.all_rows_buffer)
 
-            for dirpath, _, filenames in os.walk(self.root_dir):
-                for filename in filenames:
-                    if filename.endswith('.java'):
-                        full_path = os.path.join(dirpath, filename)
-                        rows = self._parse_java_file(full_path)
-                        
-                        for row in rows:
-                            total_count += 1
-                            # Escribir en ALL
-                            writer_all.writerow(row)
-                            
-                            # Verificar filtro y escribir en CORE
-                            class_name = row[1]
-                            if self._is_core_class(class_name):
-                                writer_core.writerow(row)
-                                core_count += 1
+        # CSV CORE (Filtrado y Deduplicado)
+        # Ordenamos por nombre de clase para consistencia
+        sorted_core_rows = sorted(self.core_classes_map.values(), key=lambda x: x[1])
+        
+        with open(self.output_core_csv, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            writer.writerows(sorted_core_rows)
 
         print(f"Proceso completado.")
-        print(f" -> Total Clases Extraidas: {total_count}")
-        print(f" -> Clases Core Filtradas: {core_count}")
-        print(f" -> CSV Todos: {self.output_all_csv}")
-        print(f" -> CSV Core:  {self.output_core_csv}")
+        print(f" -> Total Clases Encontradas: {len(self.all_rows_buffer)}")
+        print(f" -> Colisiones Resueltas: {collisions_found}")
+        print(f" -> Clases Core Únicas: {len(sorted_core_rows)}")
+        print(f" -> CSV Core: {self.output_core_csv}")
+
+        # print files:
+        df = pd.read_csv(self.output_core_csv)
+        classes = df['class'].tolist()
+        print(classes) 
 
 def main():
     if len(sys.argv) != 4:
@@ -135,6 +205,8 @@ def main():
     source_dir = sys.argv[1]
     all_csv = sys.argv[2]
     core_csv = sys.argv[3]
+
+    os.makedirs(os.path.dirname(all_csv), exist_ok=True)
 
     extractor = CoreClassExtractor(source_dir, all_csv, core_csv)
     extractor.run()
