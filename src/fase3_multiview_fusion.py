@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# fase3_multiview_fusion.py
 
 """
 FASE 3: Fusión Multivista Auto-Ponderada.
@@ -27,13 +27,13 @@ class MultiViewFusion:
             self.df_sem = pd.read_csv(sem_path, index_col=0)
             self.df_fun = pd.read_csv(fun_path, index_col=0)
         except Exception as e:
-            print(f"❌ Error cargando archivos: {e}")
+            print(f"Error cargando archivos: {e}")
             sys.exit(1)
         
         # 2. Validación de Alineación
         # Las matrices deben tener exactamente las mismas clases en el mismo orden
         if not (self.df_str.index.equals(self.df_sem.index) and self.df_str.index.equals(self.df_fun.index)):
-            print("❌ Error Crítico: Las matrices no están alineadas (diferentes clases u orden).")
+            print("Error Crítico: Las matrices no están alineadas (diferentes clases u orden).")
             print(f"   Str: {self.df_str.shape}, Sem: {self.df_sem.shape}, Fun: {self.df_fun.shape}")
             sys.exit(1)
             
@@ -173,8 +173,8 @@ class MultiViewFusion:
         print(f"[Fusion] Log de convergencia guardado en: {log_path}")
 
 def main():
-    if len(sys.argv) != 5:
-        print("Uso: python fase3_multiview_fusion.py <STR> <SEM> <FUN> <OUTPUT>")
+    if len(sys.argv) != 6:
+        print("Uso: python fase3_multiview_fusion.py <STR> <SEM> <FUN> <OUTPUT> <K_TARGET>")
         sys.exit(1)
 
     str_csv = sys.argv[1]
@@ -182,15 +182,16 @@ def main():
     fun_csv = sys.argv[3]
     out_csv = sys.argv[4]
 
+    k_target = int(sys.argv[5])
+
     if not os.path.exists(str_csv):
         print(f"Error: No existe {str_csv}")
         sys.exit(1)
 
     fusion = MultiViewFusion(str_csv, sem_csv, fun_csv)
     
-    # Usamos k=5 como heurística base para el consenso, basado en tus experimentos previos.
-    fusion.run_optimization(k_clusters=5)
-    
+    fusion.run_optimization(k_clusters=k_target)
+
     fusion.save_results(out_csv)
 
 if __name__ == '__main__':
