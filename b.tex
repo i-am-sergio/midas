@@ -27,6 +27,8 @@ Para evaluar la efectividad de la metodología propuesta, se seleccionaron cuatr
 
 Para cada sistema, se realizó un preprocesamiento para extraer todas las clases cubiertas por la lógica de la aplicación, removiendo clases independientes o utilitarias que no forman parte del núcleo funcional. La Tabla~\ref{tab:datasets} resume las características principales de estos casos de estudio después del filtrado.
 
+% Se asume que se está usando el paquete booktabs (\usepackage{booktabs})
+% y el paquete hyperref o url (\usepackage{hyperref} o \usepackage{url})
 \begin{table}[!ht]
 \centering
 \caption{Monolitos utilizados en la experimentación.}
@@ -51,7 +53,7 @@ A continuación, se detalla el dominio de cada una de estas aplicaciones, todas 
 
 Para responder a la RQ1 y validar la efectividad del enfoque MIDAS propuesto, sus resultados se comparan con un conjunto de métodos de referencia (\textit{baselines}) representativos del estado del arte en la extracción de microservicios.
 
-La selección de estos métodos se basa en la diversidad de sus enfoques (análisis estático, dinámico y semántico) y su recurrencia en la literatura académica como puntos de comparación. A continuación, se describen los \textit{baselines} seleccionados en orden cronológico.
+La selección de estos métodos se basa en la diversidad de sus enfoques (análisis estático, dinámico y semántico) y su recurrencia en la literatura académica como puntos de comparación. A continuación, se describen los \textit{baselines} seleccionados: % en orden cronológico.
 
 \begin{itemize}
     \item \textbf{MEM} \cite{mazlami2017extraction}: Esta técnica se desarrolla en dos etapas. En la etapa de construcción, el monolito se convierte en un grafo donde las clases representan nodos y las aristas el acoplamiento entre ellas. Este acoplamiento se mide utilizando tres criterios: lógico, semántico y de contribuidor. En la segunda etapa de \textit{clustering}, el grafo se descompone (por ejemplo, mediante un algoritmo de árbol de expansión mínima) para generar las particiones que se comportan como microservicios candidatos.
@@ -78,9 +80,12 @@ La selección de estos métodos se basa en la diversidad de sus enfoques (análi
 
 La implementación del enfoque MIDAS y la ejecución de los experimentos validatorios se llevaron a cabo sobre una estación de trabajo operando bajo el sistema operativo Debian GNU/Linux 13. La totalidad del desarrollo se realizó utilizando el lenguaje de programación Python 3.11, elegido por su versatilidad y su extenso ecosistema de librerías para ciencia de datos e inteligencia artificial, lo que permitió unificar tanto el análisis estático de código como los modelos de aprendizaje automático en un mismo flujo de trabajo homogéneo.
 
-Para la construcción de las vistas semántica y funcional, el sistema se apoyó en un conjunto de librerías especializadas. La generación de embeddings vectoriales mediante el modelo MPNet se gestionó a través del framework Sentence-Transformers, el cual opera sobre PyTorch para la aceleración de operaciones tensoriales. Por su parte, el enriquecimiento semántico mediante la técnica de code summarization y la deducción de escenarios de negocio se implementaron utilizando el SDK google-generativeai, el cual facilitó la integración con la API del modelo Gemini 2.5 Flash.
+Para la construcción de las vistas semántica y funcional, el sistema se apoyó en un conjunto de librerías especializadas. La generación de embeddings vectoriales mediante el modelo MPNet se gestionó a través del framework Sentence-Transformers, el cual opera sobre PyTorch para la aceleración de operaciones tensoriales. Por su parte, el enriquecimiento semántico mediante la técnica de \textit{code summarization} y la deducción de casos de uso se implementaron utilizando el SDK google-generativeai, el cual facilitó la integración con la API del modelo Gemini 2.5 Flash.
+
+Con el fin de mitigar las alucinaciones inherentes a los modelos generativos y maximizar la precisión factual, se configuró el parámetro de temperatura en 0.1. Adicionalmente, se estableció un límite estricto en la longitud de la respuesta (\textit{max output tokens} = 100). Esta configuración conservadora permitió obtener descripciones concisas y altamente consistentes de los conceptos de negocio, evitando la variabilidad creativa y la verbosidad excesiva que podrían introducir ruido en los vectores semánticos.
 
 Finalmente, el procesamiento matemático y la lógica de agrupamiento se sustentaron en bibliotecas de cálculo científico estándar. Las operaciones de álgebra lineal para la construcción y fusión de las matrices de similitud se realizaron utilizando NumPy y Pandas, garantizando una manipulación eficiente de estructuras matriciales. La fase de particionamiento se ejecutó mediante Scikit-learn, empleando sus implementaciones optimizadas para el algoritmo de clustering espectral y el cálculo de métricas de validación interna.
+
 
 %===================================================================
 
@@ -90,7 +95,7 @@ Finalmente, el procesamiento matemático y la lógica de agrupamiento se sustent
 Para evaluar de forma cuantitativa y objetiva la calidad de las descomposiciones generadas, se emplea un conjunto de métricas establecidas. Estas métricas se dividen en dos categorías: una para la validación interna del \textit{clustering} (determinación de $k$) y otras para la evaluación de la calidad arquitectónica final.
 
 \subsubsection{Métrica de Validación del Clustering}
-Como se describió en la Fase 4 de la propuesta, el número óptimo de microservicios ($k$) no se fija manualmente. Para determinarlo, se utiliza el \textbf{Coeficiente de Silhouette}. Esta métrica evalúa qué tan similar es un elemento (clase) a su propio clúster (cohesión) en comparación con otros clústeres (separación).
+Como se describió en la Fase 4 de la propuesta, el número óptimo de microservicios ($k$) no se fija manualmente. Para determinarlo, se utiliza el Coeficiente de Silhouette. Esta métrica evalúa qué tan similar es un elemento (clase) a su propio clúster (cohesión) en comparación con otros clústeres (separación).
 
 Formalmente, el coeficiente de Silhouette $s(i)$ para una clase (muestra) $i$ se calcula como:
 
@@ -304,7 +309,7 @@ Finalmente, la Tabla~\ref{tab:rq1_plants} ilustra el comportamiento del modelo e
 
 Para abordar la segunda pregunta de investigación (RQ2), esta sección evalúa la contribución de la fusión multivista comparando el rendimiento del enfoque MIDAS completo (fusión auto-ponderada) contra sus versiones de vista única (\textit{ablations}): Estructural (MIDAS-Str), Semántica (MIDAS-Sem) y Funcional (MIDAS-Fun).
 
-La Tabla~\ref{tab:rq2_ablation} presenta los resultados de esta comparación. Se resalta el mejor resultado para cada métrica en cada \textit{dataset}, permitiendo identificar en qué escenarios la integración de vistas supera a las fuentes de información aisladas.
+La Tabla~\ref{tab:rq2_ablation} presenta los resultados de esta comparación. Se resalta el mejor resultado para cada métrica en cada \textit{dataset}.
 
 \begin{table}[!ht]
 \centering
@@ -401,7 +406,7 @@ En los casos de DayTrader y Plants, el mecanismo asignó pesos extremadamente al
 
 Por el contrario, en AcmeAir y JPetStore, aunque la estructura sigue siendo preponderante, se observa una contribución mucho más significativa de las vistas complementarias. En AcmeAir, la suma de los pesos semántico y funcional alcanza un 36\% (0.184 y 0.177), el valor más alto de todos los experimentos. Esta intervención es la que explica el fenómeno observado en la RQ2, donde el acoplamiento (ICP) cayó drásticamente de 0.650 (solo estructural) a 0.030 (fusión). El algoritmo detectó que, aunque la estructura era la base, necesitaba la información semántica y funcional para refinar los límites de los servicios y corregir dependencias técnicas que no reflejaban el dominio real.
 
-En JPetStore ocurre algo similar, con un peso estructural de 0.738 y una contribución auxiliar del 26\%. Esto confirma que en sistemas donde la estructura técnica puede ser ambigua, el mecanismo auto-ponderado permite que la semántica y la funcionalidad actúen como factores de corrección ("tipping points") para decidir la pertenencia de clases fronterizas, sin sacrificar la solidez que ofrece el análisis estático.
+En JPetStore ocurre algo similar, con un peso estructural de 0.738 y una contribución auxiliar del 26\%. Esto confirma que en sistemas donde la estructura técnica puede ser ambigua, el mecanismo auto-ponderado permite que la semántica y la funcionalidad actúen como factores de corrección para decidir la pertenencia de clases fronterizas, sin sacrificar la solidez que ofrece el análisis estático.
 
 En conclusión, el mecanismo de fusión auto-ponderada impacta positivamente al actuar como un filtro de calidad adaptativo. En lugar de forzar una combinación arbitraria, el algoritmo tiene la inteligencia para replegarse casi totalmente a la vista estructural cuando esta es sólida (DayTrader, Plants) o aceptar influencias externas cuando es necesario refinar la arquitectura (AcmeAir, JPetStore). Esto demuestra que la variación de los pesos no es aleatoria, sino que refleja la claridad arquitectónica intrínseca de cada sistema legado.
 
@@ -452,6 +457,7 @@ A pesar de los resultados prometedores obtenidos en la evaluación experimental,
 
 \subsubsection{Validez Externa}
 \label{subsubsec:validez_externa}
+
 La validez externa, entendida como la capacidad de generalizar los hallazgos a otros contextos, se ve condicionada principalmente por el sesgo tecnológico de los sujetos de prueba. La evaluación se limitó a cuatro aplicaciones \textit{benchmark} de código abierto (JPetStore, DayTrader, AcmeAir, Plants) que, aunque constituyen el estándar \textit{de facto} en la literatura de microservicios, están implementadas exclusivamente en Java y poseen un tamaño moderado. En consecuencia, los resultados podrían no generalizarse automáticamente a sistemas monolíticos de escala industrial con millones de líneas de código, ni a aquellos desarrollados en lenguajes dinámicos como Python o JavaScript, cuyas estructuras idiomáticas y patrones de dependencia difieren radicalmente del tipado estático de Java.
 
 Asimismo, la metodología plantea una dependencia crítica de la disponibilidad de información funcional. Originalmente, el enfoque MIDAS se beneficia de especificaciones explícitas, como archivos OpenAPI, para construir la vista funcional. Dado que en muchos sistemas legados esta documentación es inexistente, esta amenaza fue mitigada parcialmente mediante el uso de Modelos de Lenguaje (Google Gemini 2.5 Flash) para inferir escenarios de negocio directamente desde el código fuente. Si bien esta estrategia amplía significativamente la aplicabilidad del método, introduce una nueva dependencia sobre la calidad del modelo generativo y el riesgo potencial de "alucinaciones" en la interpretación del dominio.

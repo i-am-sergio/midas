@@ -1,0 +1,55 @@
+\chapter{Introducción}
+\hrule \bigskip \vspace*{1cm}
+
+
+\section{Contexto y Motivación}
+En la ingeniería de software contemporánea, la Arquitectura de Microservicios (MSA) se ha consolidado como un paradigma arquitectónico fundamental para el desarrollo y evolución de sistemas complejos, ofreciendo ventajas significativas en términos de escalabilidad, mantenibilidad y despliegue independiente  \cite{newman2015building, taibi2017state}. A diferencia de las aplicaciones monolíticas, que operan como unidades unificadas y acopladas, la MSA promueve un desarrollo más ágil y modular al permitir que cada servicio se enfoque en una función específica del negocio \cite{fowler2014microservices}. Esta flexibilidad ha impulsado a numerosas organizaciones a iniciar procesos de migración desde arquitecturas monolíticas hacia microservicios, motivadas por los beneficios tangibles observados en la industria y respaldados por los avances en la computación en la nube \cite{s1_saucedo2025migration, s2_mohottige2025reengineering}.
+
+No obstante, esta transformación no está exenta de desafíos técnicos y conceptuales. La extracción de microservicios desde sistemas monolíticos se reconoce como una fase crítica y compleja \cite{abgaz2023decomposition, s3_oumoussa2024evolution}. Los enfoques existentes, que a menudo se basan en análisis estáticos (código fuente, clases)\cite{eski2018automatic, mazlami2017extraction} o dinámicos (trazas de ejecución, casos de uso) \cite{jin2019service, kalia2021mono2micro} y utilizan técnicas de agrupamiento, suelen enfocarse en una única perspectiva del sistema. Esta visión parcial limita la calidad de los microservicios generados, ya que ignora dimensiones cruciales como la semántica textual de las APIs, las relaciones funcionales en procesos de negocio y el conocimiento tácito del dominio. Como resultado, los microservicios extraídos pueden carecer de la cohesión funcional deseada y no alinearse completamente con los límites lógicos del negocio, lo que compromete los principios de bajo acoplamiento y alta cohesión inherentes a la MSA \cite{rademacher2019strategies}.
+
+El creciente tamaño y la complejidad de los sistemas monolíticos hacen que la descomposición manual sea inviable, costosa y propensa a errores, pues requiere un profundo entendimiento multifacético del sistema \cite{s4_abgaz2023decomposition}. Esta dificultad resalta la necesidad de métodos más robustos que integren múltiples vistas del sistema. En este escenario, el avance en técnicas de representación semántica y aprendizaje sobre grafos ofrece una oportunidad prometedora \cite{mathai2021monolith, sooksatra2022monolith}. Modelos profundos basados en transformers, como SBERT \cite{reimers2019sentencebert}, pueden capturar con mayor precisión el significado contextual de elementos textuales (especificaciones de APIs, casos de uso, etc) \cite{bajaj2024gtmicro}, mientras que los esquemas de clustering basados en grafos multivista autoajustados \cite{he2023selfweighted} pueden equilibrar e integrar diversas perspectivas del sistema (estructura, semántica, comportamiento) en una representación unificada \cite{qian2023microservice}. Este enfoque sinérgico no solo promete una descomposición más coherente y alineada con el dominio, sino que también amplía significativamente el alcance de la automatización en los procesos de migración, reduciendo el esfuerzo humano y mejorando la mantenibilidad a largo plazo de los sistemas de software.
+
+% ---------------------------------------------
+\section{Definición del problema}
+Los enfoques actuales para la descomposición de sistemas monolíticos en microservicios suelen basarse únicamente en una perspectiva estructural o semántica aislada, lo que limita su capacidad para capturar la complejidad real del sistema, omitiendo relaciones funcionales clave y conocimiento del dominio que son fundamentales para generar una descomposición coherente, cohesiva y alineada con los procesos de negocio.
+
+% ---------------------------------------------
+\section{Objetivos}
+
+\subsection{Objetivo General}
+Proponer un enfoque automatizado para la descomposición de sistemas monolíticos en microservicios mediante la fusión autoponderada de las vistas estructural, semántica y funcional en un grafo multivista, con el fin de generar particiones cohesivas y desacopladas.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}
+
+\item Extraer los artefactos del sistema monolítico necesarios para construir las vistas estructural, semántica y funcional.
+
+
+\item Construir un grafo multivista que capture las dimensiones del monolito, aplicando análisis estático de dependencias y el modelo MPNet.
+
+\item Diseñar un mecanismo de fusión de grafos multivista con ponderación automática que integre las diferentes vistas en un grafo unificado.
+
+\item Identificar la descomposición más óptima en microservicios aplicando clustering Espectral sobre el grafo ponderado.
+
+\item Evaluar la calidad de la descomposición en microservicios mediante métricas de cohesión y acoplamiento con casos de estudio representativos.
+
+\end{itemize}
+
+% ---------------------------------------------
+\section{Justificación} \label{sec:justificacion}
+
+La migración de sistemas monolíticos hacia arquitecturas de microservicios se ha consolidado como una estrategia clave para organizaciones que buscan mejorar la escalabilidad, permitir despliegues independientes y acelerar el ciclo de desarrollo de software \cite{s4_abgaz2023decomposition}. No obstante, este proceso sigue siendo complejo, costoso y propenso a errores, especialmente cuando se realiza manualmente. La migración requiere una comprensión profunda y transversal del sistema, abarcando desde su estructura interna hasta la lógica del negocio \cite{qian2023microservice}. Esta dificultad se intensifica en sistemas legados de gran tamaño, donde la documentación suele ser limitada o inexistente y los equipos originales ya no están disponibles.
+
+Los enfoques actuales de extracción automática de microservicios suelen centrarse en una o dos dimensiones del sistema, como las dependencias del código o la estructura de los módulos, sin abordar de forma efectiva otros aspectos fundamentales como la semántica, el comportamiento funcional o el conocimiento del dominio \cite{s1_saucedo2025migration, s2_mohottige2025reengineering, s3_oumoussa2024evolution}. Esta visión fragmentada puede dar lugar a descomposiciones técnicamente válidas, pero que no reflejan adecuadamente los límites lógicos del dominio, lo que resulta en microservicios con bajo valor funcional, alto acoplamiento o redundancia.
+
+Ante este panorama de fragmentación, la presente investigación postula que una descomposición de alta calidad solo puede lograrse mediante una representación holística del sistema. Para ello, el enfoque propuesto (MIDAS) se fundamenta en dos pilares tecnológicos complementarios. Primero, utiliza el paradigma de los grafos multivista como el andamiaje teórico capaz de modelar y preservar formalmente las múltiples y heterogéneas perspectivas del monolito (su estructura, semántica y funcionalidad). Segundo, aprovecha el poder de los modelos de lenguaje profundos basados en Transformers, específicamente MPNet \cite{song2020mpnet}, para construir una vista semántica de alta fidelidad. Este modelo permite capturar la riqueza contextual de los elementos textuales (clases, métodos) con una precisión que supera drásticamente las limitaciones de las técnicas léxicas tradicionales (e.g., BoW, TF-IDF).
+
+Una vez construido este grafo multivista, la propuesta aplica un mecanismo de fusión autoponderado que integra las perspectivas, ajustando dinámicamente la importancia de cada vista. Finalmente, sobre esta representación unificada, se aplica clustering Espectral, utilizando el coeficiente de Silhouette como criterio de optimización, para identificar particiones que maximizan la cohesión y minimizan el acoplamiento a través de todas las dimensiones consideradas.
+
+Este enfoque resulta especialmente útil en contextos donde se necesita automatizar el rediseño arquitectónico de sistemas heredados, en particular para organizaciones que buscan modernizar sus aplicaciones a fin de facilitar su evolución y mantenimiento. Asimismo, su implementación puede integrarse en herramientas de modernización asistida por software~\cite{kalia2021mono2micro}, brindando soporte a los equipos de desarrollo en la toma de decisiones arquitectónicas más informadas. Al mejorar la calidad y coherencia de las particiones generadas, se espera que este trabajo tenga un impacto positivo en la mantenibilidad, escalabilidad y alineación estratégica de los sistemas migrados. De este modo, la presente investigación contribuye tanto al avance del conocimiento científico como a la mejora de las prácticas en la industria del software \cite{s1_saucedo2025migration, s2_mohottige2025reengineering, s3_oumoussa2024evolution}.
+
+\section{Estructura de la tesis}
+
+La presente tesis se organiza en seis capítulos. El Capítulo~1 introduce el contexto y la motivación del trabajo, plantea el problema de investigación y define los objetivos generales y específicos. El Capítulo~2 aborda los trabajos relacionados, clasificando los enfoques existentes según el tipo de información que explotan y analizando sus aportes y limitaciones. En el Capítulo~3 se presentan los fundamentos teóricos necesarios para comprender la propuesta, incluyendo conceptos sobre microservicios, representaciones semánticas con Transformers y técnicas de clustering multivista. El Capítulo~4 describe en detalle el enfoque MIDAS, explicando cada una de sus cinco fases: extracción de datos, preprocesamiento y normalización de vistas, fusión multivista ponderada, clustering espectral y evaluación de la calidad. El Capítulo~5 detalla el diseño experimental, presenta los casos de estudio empleados y discute los resultados obtenidos a partir de la aplicación de métricas de calidad de descomposición. Finalmente, el Capítulo~6 resume las conclusiones generales, destaca las contribuciones principales del trabajo y propone líneas futuras de investigación.
+
