@@ -17,7 +17,14 @@ FILTER_SUFFIXES = [
     # AcmeAir Ruido
     'Test', 'Loader', 'Parser', 'Result', 'Results', 'Stats', 'Totals', 'Runner', 'Main',
     'Config', 'Configuration', 'Constants', 'Factory', 'Manager', 'Locator', 'Generator',
-    'Helper', 'Util', 'Utils', 'Utility', 
+    'Helper', 'Util', 'Utils', 'Utility',
+    'Converter', 
+    # DayTrader Ruido
+    'JSF', 'Listener', 'Producer', 'MDB', 'Filter',
+    # Plants Ruido
+    'Properties', 'Exception', 'Info',
+    # JRideConnect
+    'Application', 'Tests',
 ]
 
 FILTER_PREFIXES = [
@@ -26,9 +33,9 @@ FILTER_PREFIXES = [
     # AcmeAir Ruido 
     'SQL', 'Mongo', 'WXS', 'Jmeter', 'Nmon', 'Rest', 'REST',
     # DayTrader Ruido
-    'Ping',         # Elimina las ~50 clases de prueba de latencia (PingServlet, PingJDBC...)
+    'Ping', 'TradeBuild', 'Explicit', 'RunStats',
     # Plants Ruido
-    'Help', 'Populate'
+    'Help', 'Populate', 'Reset', 'Populate', 'Validate', 'Help'
 ]
 
 
