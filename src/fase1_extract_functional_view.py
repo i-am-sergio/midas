@@ -21,7 +21,7 @@ from google.genai import types
 
 # --- CONFIGURACIÓN ---
 API_KEY = os.environ.get("GEMINI_API_KEY", "PON_TU_API_KEY_AQUI")
-SAFE_DELAY_SECONDS = 10  # Respetar Free Tier (~10-15 RPM)
+SAFE_DELAY_SECONDS = 15  # Respetar Free Tier (~10-15 RPM)
 
 class FunctionalExtractorLLM:
     def __init__(self, source_dir, core_classes_csv, output_csv):
