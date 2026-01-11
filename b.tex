@@ -11,13 +11,14 @@
 \label{subsec:preguntas_investigacion}
 El diseño experimental busca responder a las siguientes tres Preguntas de Investigación (RQs) clave, formuladas para validar las contribuciones de la propuesta:
 
-\begin{enumerate}
-    \item \textbf{RQ 1:} ¿Cómo se compara la calidad de la descomposición de MIDAS con la de los métodos del estado del arte?
-    
-    \item \textbf{RQ 2:} ¿Cuál es la efectividad del enfoque multivista de MIDAS en comparación con el uso aislado de las vistas estructural, semántica y funcional?
-    
-    \item \textbf{RQ 3:} ¿Qué impacto tiene el mecanismo de fusión auto-ponderada y cómo varían los pesos de cada vista para diferentes monolitos?
-\end{enumerate}
+\begin{itemize}
+    \item \textbf{RQ1:} ¿Cómo influye la fusión multivista auto-ponderada en la calidad estructural de la descomposición en microservicios?  
+
+    \item \textbf{RQ2:} ¿Cómo afecta la fusión multivista al equilibrio y la complejidad de los microservicios resultantes?  
+
+    \item \textbf{RQ3:} ¿Cuál es la contribución relativa de cada vista (estructural, semántica y funcional) dentro del proceso de fusión multivista?  
+\end{itemize}
+
 
 %===================================================================
 \subsection{Datasets}
@@ -27,8 +28,6 @@ Para evaluar la efectividad de la metodología propuesta, se seleccionaron cuatr
 
 Para cada sistema, se realizó un preprocesamiento para extraer todas las clases cubiertas por la lógica de la aplicación, removiendo clases independientes o utilitarias que no forman parte del núcleo funcional. La Tabla~\ref{tab:datasets} resume las características principales de estos casos de estudio después del filtrado.
 
-% Se asume que se está usando el paquete booktabs (\usepackage{booktabs})
-% y el paquete hyperref o url (\usepackage{hyperref} o \usepackage{url})
 \begin{table}[!ht]
 \centering
 \caption{Monolitos utilizados en la experimentación.}
@@ -195,20 +194,20 @@ La fracción $\frac{\sum_{i=1}^{K} n_i}{K}$ calcula la proporción de microservi
 
 %===================================================================
 \section{Resultados}
-\label{sec:resultados_cuantitativos}
+\label{sec:resultados}
 
-\subsection{Respuesta a RQ1: Comparativa con el Estado del Arte}
-\label{subsec:resultados_rq1}
+\subsection{Resultados Cuantitativos}
+\label{subsec:resultados_cuantitativos}
 
-Para responder a la primera pregunta de investigación (RQ1), se evaluó cómo se compara la calidad de la descomposición generada por MIDAS con la de los métodos \textit{baseline} descritos en la sección~\ref{subsec:baselines}.
+A continuación, se detalla el desempeño de MIDAS en comparación con los métodos baselines en los cuatro datasets evaluados.
 
-Las Tablas~\ref{tab:rq1_jpetstore}, \ref{tab:rq1_daytrader}, \ref{tab:rq1_acmeair} y \ref{tab:rq1_plants} presentan una comparación exhaustiva de los resultados obtenidos por cada método en los cuatro \textit{datasets} evaluados: JPetStore, DayTrader, AcmeAir y Plants, respectivamente. Las métricas evaluadas son la Modularidad Estructural (SM), el Porcentaje de Llamadas Internas (ICP), el Número de Interfaces (IFN) y la Distribución No Extrema (NED). Para cada métrica, se indica si un valor más alto (↑) o más bajo (↓) es mejor. Los mejores resultados para cada métrica en cada \textit{dataset} se marcan en negrita.
+La Tabla~\ref{tab:jpetstore_results} presenta los resultados para este sistema de comercio electrónico. MIDAS alcanza el ICP más bajo reportado (0.241), superando tanto a enfoques estructurales (GDC-DVF) como semánticos (GTMicro). Aunque el valor de Modularidad Estructural (SM = 0.171) es ligeramente inferior al máximo obtenido por GC-VCG, la reducción significativa en el acoplamiento sugiere que MIDAS ha logrado una separación más limpia de responsabilidades, evitando la trampa común de agrupar clases utilitarias con lógica de dominio para inflar artificialmente la cohesión.
 
 %======================= JPETSTORE ===============================
 \begin{table}[!ht] % H
 \centering
-\caption{Comparación de los diferentes métodos en el dataset \textbf{JPetStore}.}
-\label{tab:rq1_jpetstore}
+\caption{Comparación de los diferentes métodos en el dataset JPetStore.}
+\label{tab:jpetstore_results}
 \begin{tabular}{l c c c c}
 \toprule
 \textbf{Método} & \textbf{SM} ($\uparrow$) & \textbf{ICP} ($\downarrow$) & \textbf{IFN} ($\downarrow$) & \textbf{NED} ($\downarrow$) \\
@@ -227,13 +226,13 @@ GTMicro & 0.112 & 0.250 & 1.830 & --- \\
 \end{tabular}
 \end{table}
 
-En el análisis del dataset JPetStore, cuyos resultados se detallan en la Tabla~\ref{tab:rq1_jpetstore}, MIDAS se posiciona como el nuevo estado del arte en términos de desacoplamiento, logrando el ICP más bajo reportado de 0.241. Este valor representa una mejora sustancial frente a enfoques puramente semánticos como GTMicro (0.250) y estructurales como GDC-DVF (0.274). Si bien la métrica de modularidad estructural (SM) obtenida por MIDAS (0.171) es marginalmente inferior al máximo alcanzado por GC-VCG (0.173), esta ligera diferencia se ve compensada por una arquitectura significativamente más limpia en términos de dependencias. Esto sugiere que la estrategia de fusión multivista logra aislar de manera efectiva los componentes transversales, como la persistencia, evitando que contaminen los límites del dominio, un problema común en descomposiciones automáticas que maximizan la modularidad a costa de aumentar el acoplamiento.
+La Tabla~\ref{tab:daytrader_results} muestra los resultados para esta aplicación Java EE, caracterizada por su alta complejidad y uso intensivo de componentes EJB. En este escenario desafiante, MIDAS demuestra su robustez logrando simultáneamente la mayor modularidad estructural (0.195) y el menor acoplamiento (0.242). El hecho de superar a métodos basados en aprendizaje profundo (como DEEPLY y GC-VCG) indica que la integración explícita de la semántica es más efectiva para desenmarañar dependencias ocultas en arquitecturas densas que los enfoques puramente topológicos.
 
 %========================= DAYTRADER ==============================
 \begin{table}[!ht]
 \centering
-\caption{Comparación de los diferentes métodos en el dataset \textbf{DayTrader}.}
-\label{tab:rq1_daytrader}
+\caption{Comparación de los diferentes métodos en el dataset DayTrader.}
+\label{tab:daytrader_results}
 \begin{tabular}{l c c c c}
 \toprule
 \textbf{Método} & \textbf{SM} ($\uparrow$) & \textbf{ICP} ($\downarrow$) & \textbf{IFN} ($\downarrow$) & \textbf{NED} ($\downarrow$) \\
@@ -251,13 +250,13 @@ GC-VCG & 0.164 & 0.290 & \textbf{1.128} & 0.789 \\
 \end{tabular}
 \end{table}
 
-Por su parte, el caso del sistema DayTrader presentado en la Tabla~\ref{tab:rq1_daytrader} demuestra la robustez del enfoque propuesto ante arquitecturas de alta complejidad técnica. En este escenario, caracterizado por un uso intensivo de Enterprise JavaBeans (EJB), MIDAS logró superar al estado del arte en las dos métricas más críticas para la mantenibilidad: la Modularidad Estructural (0.195) y el Porcentaje de Llamadas Externas (0.242). La superioridad de MIDAS sobre métodos basados en aprendizaje profundo de grafos, como GC-VCG y GDC-DVF, indica que la integración explícita de la semántica y la funcionalidad permite desenmarañar dependencias ocultas en la lógica de negocio que los enfoques puramente topológicos no logran resolver. Esto valida la idea de que la información semántica actúa como un discriminador crucial cuando la estructura de llamadas es densa y confusa.
+Como se evidencia en la Tabla~\ref{tab:acmeair_results}, el desempeño en AcmeAir es prácticamente ideal. Con un ICP de 0.030 y un equilibrio perfecto de servicios (NED = 0.000), el algoritmo logró identificar con precisión los contextos delimitados naturales del dominio (Vuelos, Reservas, Autenticación). A diferencia de otros métodos que fragmentan excesivamente el sistema (aumentando IFN) o crean servicios gigantes, MIDAS mantuvo la integridad funcional de los módulos.
 
 %========================= ACMEAIR ==============================
 \begin{table}[!ht]
 \centering
-\caption{Comparación de los diferentes métodos en el dataset \textbf{AcmeAir}.}
-\label{tab:rq1_acmeair}
+\caption{Comparación de los diferentes métodos en el dataset AcmeAir.}
+\label{tab:acmeair_results}
 \begin{tabular}{l c c c c}
 \toprule
 \textbf{Método} & \textbf{SM} ($\uparrow$) & \textbf{ICP} ($\downarrow$) & \textbf{IFN} ($\downarrow$) & \textbf{NED} ($\downarrow$) \\
@@ -275,13 +274,13 @@ GC-VCG & \textbf{0.150} & 0.091 & \textbf{0.167} & 0.700 \\
 \end{tabular}
 \end{table}
 
-En lo que respecta al sistema AcmeAir, cuyos datos se muestran en la Tabla~\ref{tab:rq1_acmeair}, el rendimiento de MIDAS es sobresaliente, alcanzando una descomposición arquitectónicamente ideal. El modelo logró un acoplamiento casi nulo con un ICP de 0.030 y una métrica de equilibrio deseable (NED = 0.000). Estos valores extremos indican que el algoritmo identificó correctamente en su totalidad los contextos delimitados naturales del sistema (Vuelos, Reservas, Clientes y Autenticación), separándolos de manera limpia sin dejar residuos funcionales. A diferencia de GC-VCG, que maximiza la modularidad estructural a costa de un mayor desequilibrio en el tamaño de los servicios, MIDAS priorizó la autonomía funcional, produciendo microservicios que son tanto independientes como equilibrados en tamaño y responsabilidad.
+Finalmente, la Tabla~\ref{tab:plants_results} expone los resultados en Plants. Aquí, la propuesta maximiza tanto la modularidad (0.225) como la reducción de interfaces (0.833). El valor alto de NED (0.833) en este contexto no indica un fallo, sino una preferencia del algoritmo por una granularidad fina y altamente cohesiva, aislando servicios utilitarios pequeños en lugar de forzar una uniformidad de tamaño que violaría el principio de responsabilidad única.
 
 %========================= PLANTS ==============================
 \begin{table}[!ht]
 \centering
-\caption{Comparación de los diferentes métodos en el dataset \textbf{Plants}.}
-\label{tab:rq1_plants}
+\caption{Comparación de los diferentes métodos en el dataset Plants.}
+\label{tab:plants_results}
 \begin{tabular}{l c c c c}
 \toprule
 \textbf{Método} & \textbf{SM} ($\uparrow$) & \textbf{ICP} ($\downarrow$) & \textbf{IFN} ($\downarrow$) & \textbf{NED} ($\downarrow$) \\
@@ -299,23 +298,21 @@ GC-VCG & 0.185 & 0.550 & 3.188 & 0.675 \\
 \end{tabular}
 \end{table}
 
-Finalmente, la Tabla~\ref{tab:rq1_plants} ilustra el comportamiento del modelo en el dataset Plants, donde se observa una clara tendencia hacia la granularidad fina y la alta especialización. MIDAS obtiene los mejores valores en Modularidad (0.225) y Acoplamiento (0.256), reduciendo drásticamente la complejidad de las interfaces (IFN = 0.833) en comparación con el promedio de los otros métodos. Aunque esta estrategia resulta en un valor elevado de NED (0.833), esto no debe interpretarse como un fallo, sino como una consecuencia natural de identificar correctamente servicios utilitarios pequeños y atómicos, como componentes de envío de correos o gestión de inventarios. Estos resultados confirman que la propuesta prioriza la pureza funcional y la alta cohesión interna sobre la uniformidad artificial del tamaño de los servicios, una decisión de diseño alineada con los principios modernos de microservicios.
-
-
-
 %===================================================================
-\subsection{Respuesta a RQ2: Efectividad de la Fusión Multivista}
-\label{subsec:resultados_rq2}
+\subsection{Estudio de Ablación}
+\label{subsec:estudio_ablacion}
 
-Para abordar la segunda pregunta de investigación (RQ2), esta sección evalúa la contribución de la fusión multivista comparando el rendimiento del enfoque MIDAS completo (fusión auto-ponderada) contra sus versiones de vista única (\textit{ablations}): Estructural (MIDAS-Str), Semántica (MIDAS-Sem) y Funcional (MIDAS-Fun).
+Con el fin de determinar la contribución individual de cada fuente de información, se realizó un estudio de ablación comparando la versión completa de MIDAS (Fusión) frente a sus variantes de vista única: Estructural (MIDAS-Str), Semántica (MIDAS-Sem) y Funcional (MIDAS-Fun). Los resultados se resumen en la Tabla~\ref{tab:ablation}.
 
-La Tabla~\ref{tab:rq2_ablation} presenta los resultados de esta comparación. Se resalta el mejor resultado para cada métrica en cada \textit{dataset}.
+El análisis revela un patrón dual. Por un lado, las vistas aisladas ofrecen un rendimiento competente por sí mismas; esto valida la eficacia de la fase de preprocesamiento, donde el uso de LLMs (Gemini 2.5) limpia el ruido técnico del vocabulario, permitiendo que incluso una vista puramente semántica (MIDAS-Sem) logre agrupaciones coherentes.
+
+Sin embargo, la superioridad de la fusión multivista se manifiesta en la gestión de la complejidad y los casos extremos. En \textbf{DayTrader}, donde la estructura es compleja y engañosa (ICP estructural de 0.399), la fusión integra la semántica para corregir dependencias espurias, reduciendo el acoplamiento a 0.242. En \textbf{AcmeAir}, donde las vistas aisladas tendían a soluciones desbalanceadas (NED alto), la fusión actuó como un mecanismo de consenso, estabilizando la arquitectura hacia un equilibrio perfecto (NED 0.000). En \textbf{Plants}, la fusión tuvo la inteligencia de no degradar el excelente rendimiento estructural, manteniendo los mejores valores. Esto confirma que el enfoque multivista no es simplemente aditivo, sino que aporta robustez y capacidad de corrección ante las deficiencias particulares de cada vista individual.
 
 \begin{table}[!ht]
 \centering
 \caption{Resultados de la comparación de ablación de vistas (RQ2). Comparativa entre el uso de vistas aisladas y la fusión multivista.}
-\label{tab:rq2_ablation}
-\resizebox{\textwidth}{!}{% Redimensiona la tabla para que quepa en el ancho de la página
+\label{tab:ablation}
+\resizebox{\textwidth}{!}{
 \begin{tabular}{l l c c c c}
 \toprule
 \textbf{Dataset} & \textbf{Métrica} & \textbf{MIDAS-Str} & \textbf{MIDAS-Sem} & \textbf{MIDAS-Fun} & \textbf{MIDAS (Fusión)} \\
@@ -349,34 +346,25 @@ La Tabla~\ref{tab:rq2_ablation} presenta los resultados de esta comparación. Se
 \end{table}
 
 
-El análisis de la Tabla~\ref{tab:rq2_ablation} pone de manifiesto, en primer lugar, que las versiones de vista única (MIDAS-Str y MIDAS-Sem) ofrecen por sí mismas un rendimiento notablemente alto, superando en algunos casos a los baselines del estado del arte. Esto se atribuye a la calidad del preprocesamiento de datos implementado en la Fase 1. Particularmente, la vista estructural se beneficia de un extractor que filtra el ruido de clases auxiliares, mientras que las vistas semántica y funcional son potenciadas por el uso de Modelos de Lenguaje de Gran Escala (LLM). Al utilizar Gemini 2.5 Flash para generar resúmenes de código (\textit{code summarization}) y deducir escenarios de negocio, MIDAS logra limpiar el "ruido técnico" del vocabulario. Esto favorece un agrupamiento orientado al Vertical Slicing, donde las clases se agrupan por funcionalidad de negocio (como juntar controlador, servicio y repositorio de Pedidos) en lugar de por capas técnicas, lo cual explica por qué MIDAS-Sem mantiene niveles competitivos de acoplamiento (ICP) incluso sin información estructural.
+% El análisis de la Tabla~\ref{tab:ablation} pone de manifiesto, en primer lugar, que las versiones de vista única (MIDAS-Str y MIDAS-Sem) ofrecen por sí mismas un rendimiento notablemente alto, superando en algunos casos a los baselines del estado del arte. Esto se atribuye a la calidad del preprocesamiento de datos implementado en la Fase 1. Particularmente, la vista estructural se beneficia de un extractor que filtra el ruido de clases auxiliares, mientras que las vistas semántica y funcional son potenciadas por el uso de Modelos de Lenguaje de Gran Escala (LLM). Al utilizar Gemini 2.5 Flash para generar resúmenes de código (\textit{code summarization}) y deducir escenarios de negocio, MIDAS logra limpiar el ``ruido técnico" del vocabulario. Esto favorece un agrupamiento orientado al \textit{Vertical Slicing}, donde las clases se agrupan por funcionalidad de negocio (como juntar controlador, servicio y repositorio de Pedidos) en lugar de por capas técnicas, lo cual explica por qué MIDAS-Sem mantiene niveles competitivos de acoplamiento (ICP) incluso sin información estructural.
 
-Sin embargo, la efectividad superior de la fusión multivista se hace evidente al observar la variabilidad de la complejidad entre los sistemas. En el caso de DayTrader, el sistema más complejo, la vista estructural pura tiende a lograr alta cohesión interna pero fallar drásticamente en el acoplamiento externo (ICP = 0.399). Aquí, la fusión integra la perspectiva semántica enriquecida por el LLM, que es capaz de desenmarañar dependencias sintácticas engañosas, reduciendo el acoplamiento final a 0.242. Esto demuestra que la semántica actúa como un corrector funcional cuando la estructura está degradada.
+% Sin embargo, la efectividad superior de la fusión multivista se hace evidente al observar la variabilidad de la complejidad entre los sistemas. En el caso de DayTrader, el sistema más complejo, la vista estructural pura tiende a lograr alta cohesión interna pero fallar drásticamente en el acoplamiento externo (ICP = 0.399). Aquí, la fusión integra la perspectiva semántica enriquecida por el LLM, que es capaz de desenmarañar dependencias sintácticas engañosas, reduciendo el acoplamiento final a 0.242. Esto demuestra que la semántica actúa como un corrector funcional cuando la estructura está degradada.
 
-En sistemas como AcmeAir, la fusión desempeña un rol crítico de regularización arquitectónica. Mientras que las vistas aisladas proponen particiones extremas (servicios demasiado grandes o demasiado fragmentados, reflejado en NED altos), la versión fusionada logra un equilibrio ideal (NED = 0.000) manteniendo un acoplamiento casi nulo. En este escenario, la fusión actúa como un mecanismo de consenso, descartando las alucinaciones del modelo semántico o la rigidez del modelo estructural para converger hacia una arquitectura balanceada.
+% En sistemas como AcmeAir, la fusión desempeña un rol crítico de regularización arquitectónica. Mientras que las vistas aisladas proponen particiones extremas (servicios demasiado grandes o demasiado fragmentados, reflejado en NED altos), la versión fusionada logra un equilibrio ideal (NED = 0.000) manteniendo un acoplamiento casi nulo. En este escenario, la fusión actúa como un mecanismo de consenso, descartando las alucinaciones del modelo semántico o la rigidez del modelo estructural para converger hacia una arquitectura balanceada.
 
-Por otro lado, en sistemas con una arquitectura técnica bien definida como Plants o JPetStore, la vista estructural por sí sola resulta muy potente. En estos casos, el mecanismo de fusión auto-ponderada demuestra su inteligencia adaptativa: al detectar que la vista semántica o funcional introduce ruido (posiblemente por ambigüedades en los términos de negocio deducidos por el LLM), el algoritmo asigna pesos dominantes a la estructura. Esto se evidencia en Plants, donde los resultados de la fusión convergen casi exactamente con los de MIDAS-Str, validando que el mecanismo no fuerza una combinación destructiva, sino que se repliega a la fuente más confiable.
-
-En respuesta a la RQ2, se concluye que la efectividad del enfoque multivista de MIDAS radica en su robustez y adaptabilidad. Aunque las vistas aisladas son competentes gracias al enriquecimiento con LLMs, la fusión ofrece una garantía de calidad superior: corrige errores de diseño en sistemas complejos (DayTrader), optimiza la granularidad en sistemas desbalanceados (AcmeAir) y preserva la integridad estructural en sistemas limpios (Plants), ofreciendo una solución más generalizable que cualquier vista individual.
+% Por otro lado, en sistemas con una arquitectura técnica bien definida como Plants o JPetStore, la vista estructural por sí sola resulta muy potente. En estos casos, el mecanismo de fusión auto-ponderada demuestra su inteligencia adaptativa: al detectar que la vista semántica o funcional introduce ruido (posiblemente por ambigüedades en los términos de negocio deducidos por el LLM), el algoritmo asigna pesos dominantes a la estructura. Esto se evidencia en Plants, donde los resultados de la fusión convergen casi exactamente con los de MIDAS-Str, validando que el mecanismo no fuerza una combinación destructiva, sino que se repliega a la fuente más confiable.
 
 
 
-%===================================================================
+\subsection{Análisis del Mecanismo de Fusión}
+\label{subsec:analisis_fusion}
 
-\subsection{Respuesta a RQ3: Análisis del Mecanismo de Fusión Auto-Ponderada}
-\label{subsec:resultados_rq3}
-
-
-La tercera pregunta de investigación (RQ3) se centra en validar el componente más novedoso de la propuesta: el mecanismo de fusión auto-ponderada. El objetivo es doble: determinar si la asignación de pesos dinámicos tiene un impacto significativo y analizar cómo varían estos pesos entre diferentes monolitos para entender qué vistas considera el modelo más informativas.
-
-Para ello, se extrajeron los pesos finales ($w_v$) que el algoritmo de optimización asignó a cada una de las tres vistas durante la fase de fusión para cada uno de los cuatro datasets. La Tabla~\ref{tab:rq3_weights} resume estos pesos, donde $w_{str}$ corresponde a la vista estructural, $w_{sem}$ a la vista semántica y $w_{fun}$ a la vista funcional.
-
-Para ilustrar el impacto visual de esta integración, la Figura~\ref{fig:matrices_visual} presenta las matrices de afinidad procesadas. En dicha figura se evidencia cómo la base topológica provista por la Matriz Estructural (A) se complementa con la información de las matrices Semántica (B) y Funcional (C). La Matriz Fusionada resultante (D) integra estos patrones heterogéneos, exhibiendo una estructura de bloques más nítida y definida que facilita al algoritmo de \textit{clustering} la identificación precisa de los límites de los servicios.
+Para comprender cómo el algoritmo prioriza la información, se extrajeron los pesos finales ($w_v$) asignados a cada vista durante la optimización. La Tabla~\ref{tab:midas_weights} resume estos valores y la Figura~\ref{fig:matrices_visual} ilustra visualmente el efecto de la integración en las matrices de similitud.
 
 \begin{table}[!ht]
 \centering
 \caption{Pesos de vista aprendidos ($w_v$) por el mecanismo de fusión auto-ponderada para cada dataset (RQ3). Los pesos representan la importancia relativa asignada a cada fuente.}
-\label{tab:rq3_weights}
+\label{tab:midas_weights}
 \begin{tabular}{l c c c}
 \toprule
 \textbf{Aplicación} & 
@@ -399,17 +387,20 @@ Plants    & 0.899 & 0.054 & 0.047 \\
     \label{fig:matrices_visual}
 \end{figure}
 
+Los datos revelan que el mecanismo actúa como un filtro de calidad adaptativo. La vista estructural se establece sistemáticamente como la ``columna vertebral" del proceso ($w_{str} > 0.60$). Sin embargo, lo crucial es la varianza en los pesos complementarios. En sistemas con arquitectura explícita y limpia como \textbf{DayTrader} y \textbf{Plants}, el algoritmo margina casi totalmente las vistas semánticas (pesos < 0.06), confiando ciegamente en la estructura para evitar ruido. 
 
-Los resultados presentados en la Tabla~\ref{tab:rq3_weights} responden afirmativamente a la RQ3, revelando un comportamiento consistente del algoritmo: la vista estructural es identificada sistemáticamente como la fuente de información más fiable para la partición, recibiendo el peso dominante ($w_{str} > 0.60$) en todos los casos. Sin embargo, la magnitud de esta dominancia varía según el sistema, lo que ofrece insights valiosos sobre la arquitectura de cada monolito.
+Por el contrario, en \textbf{AcmeAir} y \textbf{JPetStore}, donde la estructura técnica presenta mayor ambigüedad, la contribución combinada de las vistas semántica y funcional asciende hasta un 36\%. Esta intervención no es aleatoria; coincide precisamente con los casos donde la fusión logró mejoras drásticas en las métricas de acoplamiento y equilibrio (observadas en la sección anterior). Esto demuestra que el mecanismo de auto-ponderación posee la inteligencia para discernir cuándo la estructura es suficiente y cuándo requiere el contexto del negocio para refinar los límites de los microservicios.
 
-En los casos de DayTrader y Plants, el mecanismo asignó pesos extremadamente altos a la vista estructural (0.944 y 0.899, respectivamente), marginando casi por completo a las vistas semántica y funcional. Esto indica que, para estos sistemas, el grafo de llamadas estáticas contiene una estructura de clústeres muy clara y definida, mientras que las vistas semánticas y funcionales probablemente presentaban mayor dispersión o ruido. Este hallazgo es coherente con los resultados de la RQ2, donde se observó que la versión de vista estructural pura (MIDAS-Str) ya ofrecía un rendimiento excelente en estos datasets, haciendo innecesaria una fuerte intervención de otras vistas.
 
-Por el contrario, en AcmeAir y JPetStore, aunque la estructura sigue siendo preponderante, se observa una contribución mucho más significativa de las vistas complementarias. En AcmeAir, la suma de los pesos semántico y funcional alcanza un 36\% (0.184 y 0.177), el valor más alto de todos los experimentos. Esta intervención es la que explica el fenómeno observado en la RQ2, donde el acoplamiento (ICP) cayó drásticamente de 0.650 (solo estructural) a 0.030 (fusión). El algoritmo detectó que, aunque la estructura era la base, necesitaba la información semántica y funcional para refinar los límites de los servicios y corregir dependencias técnicas que no reflejaban el dominio real.
+% La Tabla~\ref{tab:midas_weights} revela un comportamiento consistente del algoritmo: la vista estructural es identificada sistemáticamente como la fuente de información más fiable para la partición, recibiendo el peso dominante ($w_{str} > 0.60$) en todos los casos. Sin embargo, la magnitud de esta dominancia varía según el sistema, lo que ofrece insights valiosos sobre la arquitectura de cada monolito.
 
-En JPetStore ocurre algo similar, con un peso estructural de 0.738 y una contribución auxiliar del 26\%. Esto confirma que en sistemas donde la estructura técnica puede ser ambigua, el mecanismo auto-ponderado permite que la semántica y la funcionalidad actúen como factores de corrección para decidir la pertenencia de clases fronterizas, sin sacrificar la solidez que ofrece el análisis estático.
+% En los casos de DayTrader y Plants, el mecanismo asignó pesos extremadamente altos a la vista estructural (0.944 y 0.899, respectivamente), marginando casi por completo a las vistas semántica y funcional. Esto indica que, para estos sistemas, el grafo de llamadas estáticas contiene una estructura de clústeres muy clara y definida, mientras que las vistas semánticas y funcionales probablemente presentaban mayor dispersión o ruido. Este hallazgo es coherente con los resultados de la RQ2, donde se observó que la versión de vista estructural pura (MIDAS-Str) ya ofrecía un rendimiento excelente en estos datasets, haciendo innecesaria una fuerte intervención de otras vistas.
 
-En conclusión, el mecanismo de fusión auto-ponderada impacta positivamente al actuar como un filtro de calidad adaptativo. En lugar de forzar una combinación arbitraria, el algoritmo tiene la inteligencia para replegarse casi totalmente a la vista estructural cuando esta es sólida (DayTrader, Plants) o aceptar influencias externas cuando es necesario refinar la arquitectura (AcmeAir, JPetStore). Esto demuestra que la variación de los pesos no es aleatoria, sino que refleja la claridad arquitectónica intrínseca de cada sistema legado.
+% Por el contrario, en AcmeAir y JPetStore, aunque la estructura sigue siendo preponderante, se observa una contribución mucho más significativa de las vistas complementarias. En AcmeAir, la suma de los pesos semántico y funcional alcanza un 36\% (0.184 y 0.177), el valor más alto de todos los experimentos. Esta intervención es la que explica el fenómeno observado en la RQ2, donde el acoplamiento (ICP) cayó drásticamente de 0.650 (solo estructural) a 0.030 (fusión). El algoritmo detectó que, aunque la estructura era la base, necesitaba la información semántica y funcional para refinar los límites de los servicios y corregir dependencias técnicas que no reflejaban el dominio real.
 
+% En JPetStore ocurre algo similar, con un peso estructural de 0.738 y una contribución auxiliar del 26\%. Esto confirma que en sistemas donde la estructura técnica puede ser ambigua, el mecanismo auto-ponderado permite que la semántica y la funcionalidad actúen como factores de corrección para decidir la pertenencia de clases fronterizas, sin sacrificar la solidez que ofrece el análisis estático.
+
+% En conclusión, el mecanismo de fusión auto-ponderada impacta positivamente al actuar como un filtro de calidad adaptativo. En lugar de forzar una combinación arbitraria, el algoritmo tiene la inteligencia para replegarse casi totalmente a la vista estructural cuando esta es sólida (DayTrader, Plants) o aceptar influencias externas cuando es necesario refinar la arquitectura (AcmeAir, JPetStore). Esto demuestra que la variación de los pesos no es aleatoria, sino que refleja la claridad arquitectónica intrínseca de cada sistema legado.
 
 %===================================================================
 
@@ -431,44 +422,56 @@ En conclusión, el mecanismo de fusión auto-ponderada impacta positivamente al 
 \section{Discusión}
 \label{sec:discusion}
 
-En esta sección se interpretan los hallazgos presentados en la sección anterior, conectando los resultados de las tres preguntas de investigación (RQs) para formar una conclusión integral sobre el desempeño de MIDAS. Posteriormente, se discuten las amenazas a la validez que podrían afectar la generalización e interpretación de este estudio.
+
+A partir de los resultados expuestos, esta sección interpreta los hallazgos para responder a las preguntas de investigación planteadas.
+
+\subsection{Sobre la Influencia en la Calidad Estructural (RQ1):}
+Los resultados confirman que la fusión multivista auto-ponderada mejora significativamente la cohesión y, especialmente, el desacoplamiento de los microservicios. La métrica ICP (Porcentaje de Llamadas Internas) en MIDAS fue consistentemente inferior a la de los métodos del estado del arte en sistemas complejos como DayTrader y JPetStore. Esto se atribuye a la capacidad del algoritmo para integrar la semántica del dominio como un discriminador de dependencias. Mientras que los enfoques puramente estructurales se ven obligados a agrupar clases basándose en cualquier dependencia sintáctica fuerte (como clases de utilidad o DTOs compartidos), MIDAS utiliza la información semántica para identificar si esa dependencia representa una relación de negocio real. Al hacerlo, logra "romper" enlaces técnicos espurios, aislando componentes transversales y generando fronteras de servicio más limpias y mantenibles.
+
+\subsection{Sobre el Equilibrio y la Complejidad (RQ2):}
+Respecto al equilibrio de la arquitectura, la evidencia sugiere que la fusión multivista actúa como un mecanismo de regularización. En el caso de AcmeAir, donde las vistas estructurales y funcionales por separado proponían particiones desbalanceadas (NED alto), la fusión de ambas convergió en una solución de equilibrio ideal (NED = 0.000). Esto indica que la combinación de vistas mitiga los sesgos inherentes a una sola fuente de información: evita la creación de "God Classes" (común en análisis estructural puro) y la fragmentación excesiva (común en análisis semántico puro). Sin embargo, en sistemas como Plants, el modelo favoreció una granularidad fina (NED alto pero IFN bajo). Esto demuestra que el algoritmo no busca el equilibrio por sí mismo como un fin artificial, sino que adapta la complejidad de la solución a la estructura intrínseca del sistema, priorizando interfaces simples (IFN bajo) sobre tamaños uniformes.
+
+\subsection{Sobre la Contribución de las Vistas y los Pesos (RQ3):}
+El análisis del mecanismo de auto-ponderación revela que la vista estructural funciona como la columna vertebral del proceso, recibiendo sistemáticamente el mayor peso ($w_{str} > 0.60$). No obstante, la contribución de las vistas semántica y funcional varía dinámicamente según la claridad del sistema, tal como se muestra en la Tabla \ref{tab:midas_weights}. En sistemas donde la estructura técnica es ambigua o presenta alto acoplamiento (AcmeAir, JPetStore), el algoritmo asignó hasta un 36\% de peso combinado a las vistas semántica y funcional. Esta intervención fue determinante para corregir los límites de los servicios y reducir el acoplamiento. Por el contrario, en sistemas con una arquitectura técnica explícita (DayTrader, Plants), el modelo se replegó inteligentemente hacia la vista estructural ($w_{str} > 0.90$), minimizando el ruido semántico. Esto valida la hipótesis de que el mecanismo de fusión no es una simple suma, sino un filtro adaptativo que maximiza la relación señal-ruido.
+
+
+\subsection{Comparativa con el Estado del Arte}
+\label{subsec:resultados_rq1}
+
+Se evaluó cómo se compara la calidad de la descomposición generada por MIDAS con la de los métodos \textit{baseline} descritos en la sección~\ref{subsec:baselines}.
+
+Las Tablas~\ref{tab:rq1_jpetstore}, \ref{tab:rq1_daytrader}, \ref{tab:rq1_acmeair} y \ref{tab:rq1_plants} presentan una comparación exhaustiva de los resultados obtenidos por cada método en los cuatro \textit{datasets} evaluados: JPetStore, DayTrader, AcmeAir y Plants, respectivamente. Las métricas evaluadas son la Modularidad Estructural (SM), el Porcentaje de Llamadas Internas (ICP), el Número de Interfaces (IFN) y la Distribución No Extrema (NED). Para cada métrica, se indica si un valor más alto (↑) o más bajo (↓) es mejor. Los mejores resultados para cada métrica en cada \textit{dataset} se marcan en negrita.
+
+
+En el análisis del dataset JPetStore, cuyos resultados se detallan en la Tabla~\ref{tab:rq1_jpetstore}, MIDAS se posiciona como el nuevo estado del arte en términos de desacoplamiento, logrando el ICP más bajo reportado de 0.241. Este valor representa una mejora sustancial frente a enfoques puramente semánticos como GTMicro (0.250) y estructurales como GDC-DVF (0.274). Si bien la métrica de modularidad estructural (SM) obtenida por MIDAS (0.171) es marginalmente inferior al máximo alcanzado por GC-VCG (0.173), esta ligera diferencia se ve compensada por una arquitectura significativamente más limpia en términos de dependencias. Esto sugiere que la estrategia de fusión multivista logra aislar de manera efectiva los componentes transversales, como la persistencia, evitando que contaminen los límites del dominio, un problema común en descomposiciones automáticas que maximizan la modularidad a costa de aumentar el acoplamiento.
+
+Por su parte, el caso del sistema DayTrader presentado en la Tabla~\ref{tab:rq1_daytrader} demuestra la robustez del enfoque propuesto ante arquitecturas de alta complejidad técnica. En este escenario, caracterizado por un uso intensivo de Enterprise JavaBeans (EJB), MIDAS logró superar al estado del arte en las dos métricas más críticas para la mantenibilidad: la Modularidad Estructural (0.195) y el Porcentaje de Llamadas Externas (0.242). La superioridad de MIDAS sobre métodos basados en aprendizaje profundo de grafos, como GC-VCG y GDC-DVF, indica que la integración explícita de la semántica y la funcionalidad permite desenmarañar dependencias ocultas en la lógica de negocio que los enfoques puramente topológicos no logran resolver. Esto valida la idea de que la información semántica actúa como un discriminador crucial cuando la estructura de llamadas es densa y confusa.
+
+En lo que respecta al sistema AcmeAir, cuyos datos se muestran en la Tabla~\ref{tab:rq1_acmeair}, el rendimiento de MIDAS es sobresaliente, alcanzando una descomposición arquitectónicamente ideal. El modelo logró un acoplamiento casi nulo con un ICP de 0.030 y una métrica de equilibrio deseable (NED = 0.000). Estos valores extremos indican que el algoritmo identificó correctamente en su totalidad los contextos delimitados naturales del sistema (Vuelos, Reservas, Clientes y Autenticación), separándolos de manera limpia sin dejar residuos funcionales. A diferencia de GC-VCG, que maximiza la modularidad estructural a costa de un mayor desequilibrio en el tamaño de los servicios, MIDAS priorizó la autonomía funcional, produciendo microservicios que son tanto independientes como equilibrados en tamaño y responsabilidad.
+
+Finalmente, la Tabla~\ref{tab:rq1_plants} ilustra el comportamiento del modelo en el dataset Plants, donde se observa una clara tendencia hacia la granularidad fina y la alta especialización. MIDAS obtiene los mejores valores en Modularidad (0.225) y Acoplamiento (0.256), reduciendo drásticamente la complejidad de las interfaces (IFN = 0.833) en comparación con el promedio de los otros métodos. Aunque esta estrategia resulta en un valor elevado de NED (0.833), esto no debe interpretarse como un fallo, sino como una consecuencia natural de identificar correctamente servicios utilitarios pequeños y atómicos, como componentes de envío de correos o gestión de inventarios. Estos resultados confirman que la propuesta prioriza la pureza funcional y la alta cohesión interna sobre la uniformidad artificial del tamaño de los servicios, una decisión de diseño alineada con los principios modernos de microservicios.
+
 
 %===================================================================
-\subsection{Interpretación de los Hallazgos}
-\label{subsec:interpretacion}
-
-Los resultados experimentales en su conjunto validan la idea central de esta tesis: la descomposición de monolitos mediante un enfoque de grafos multivista auto-ponderado supera las limitaciones de los enfoques de vista única, especialmente en términos de desacoplamiento y autonomía de servicios.
-
-La interpretación de la \textit{RQ2} (Efectividad de la Fusión) proporciona la evidencia más clara sobre el valor de la propuesta. A diferencia de lo que sugeriría la intuición inicial, las vistas aisladas no siempre funcionan mal; de hecho, la vista estructural demostró ser muy competente en términos de cohesión (SM). Sin embargo, el análisis reveló que la estructura por sí sola tiende a generar arquitecturas técnicamente acopladas en sistemas complejos. El caso de DayTrader es paradigmático: la vista estructural generó un acoplamiento (ICP) de 0.399, mientras que la fusión lo redujo drásticamente a 0.242. Esto indica que la fusión actúa como un mecanismo de corrección funcional. Al integrar la semántica enriquecida por LLMs y la funcionalidad, MIDAS logra "romper" dependencias de código que, aunque existen sintácticamente, no representan una relación de dominio real, favoreciendo así el \textit{Vertical Slicing}.
-
-Este comportamiento se explica profundamente al analizar la \textit{RQ3} (Mecanismo de Fusión). Los pesos aprendidos revelaron una realidad interesante: la vista estructural es consistentemente la fuente dominante de información ($w_{str} > 0.60$ en todos los casos). Sin embargo, la clave del éxito no radica en la dominancia, sino en la contribución marginal de las otras vistas. En AcmeAir, donde la suma de los pesos semántico y funcional alcanzó un 36\%, se logró una arquitectura ideal (NED = 0.000, ICP = 0.030). Esto sugiere que el mecanismo de auto-ponderación utiliza la estructura como "columna vertebral" del grafo, pero emplea la semántica y la funcionalidad como factores de ajuste fino para resolver ambigüedades en los límites de los servicios, logrando un equilibrio que ninguna vista por sí sola pudo alcanzar.
-
-Finalmente, al contrastar estos hallazgos con la \textit{RQ1} (Estado del Arte), MIDAS se posiciona como una solución superior en la dimensión más crítica de los microservicios: la independencia. En los cuatro \textit{datasets} evaluados, MIDAS alcanzó o superó los mejores valores históricos de acoplamiento (ICP). En sistemas de alta complejidad como DayTrader, superó a métodos basados en aprendizaje profundo (como GC-VCG) tanto en cohesión como en acoplamiento. En sistemas de dominio claro como AcmeAir y Plants, logró descomposiciones arquitectónicamente ideales. Esto demuestra que la estrategia de MIDAS de combinar la precisión del análisis estático con la capacidad de abstracción de los modelos de lenguaje produce resultados más robustos y alineados con el negocio que los enfoques puramente matemáticos o estructurales existentes.
-
-En resumen, los hallazgos sugieren que la fortaleza de MIDAS radica en su capacidad para discernir cuándo confiar en la estructura y cuándo corregirla. No se trata simplemente de promediar vistas, sino de utilizar la información multidimensional para purificar los límites de los microservicios, resultando en particiones que maximizan la autonomía funcional.
-
-
-
-%===================================================================
-\subsection{Amenazas a la Validez}
+\section{Amenazas a la Validez}
 \label{subsec:amenazas_validez}
 
 A pesar de los resultados prometedores obtenidos en la evaluación experimental, este estudio posee limitaciones inherentes que deben ser reconocidas para una interpretación adecuada y equilibrada de los hallazgos. Estas amenazas se clasifican en tres dimensiones: validez externa, interna y de constructo.
 
-\subsubsection{Validez Externa}
+\subsection{Validez Externa}
 \label{subsubsec:validez_externa}
 
 La validez externa, entendida como la capacidad de generalizar los hallazgos a otros contextos, se ve condicionada principalmente por el sesgo tecnológico de los sujetos de prueba. La evaluación se limitó a cuatro aplicaciones \textit{benchmark} de código abierto (JPetStore, DayTrader, AcmeAir, Plants) que, aunque constituyen el estándar \textit{de facto} en la literatura de microservicios, están implementadas exclusivamente en Java y poseen un tamaño moderado. En consecuencia, los resultados podrían no generalizarse automáticamente a sistemas monolíticos de escala industrial con millones de líneas de código, ni a aquellos desarrollados en lenguajes dinámicos como Python o JavaScript, cuyas estructuras idiomáticas y patrones de dependencia difieren radicalmente del tipado estático de Java.
 
 Asimismo, la metodología plantea una dependencia crítica de la disponibilidad de información funcional. Originalmente, el enfoque MIDAS se beneficia de especificaciones explícitas, como archivos OpenAPI, para construir la vista funcional. Dado que en muchos sistemas legados esta documentación es inexistente, esta amenaza fue mitigada parcialmente mediante el uso de Modelos de Lenguaje (Google Gemini 2.5 Flash) para inferir escenarios de negocio directamente desde el código fuente. Si bien esta estrategia amplía significativamente la aplicabilidad del método, introduce una nueva dependencia sobre la calidad del modelo generativo y el riesgo potencial de "alucinaciones" en la interpretación del dominio.
 
-\subsubsection{Validez Interna}
+\subsection{Validez Interna}
 \label{subsubsec:validez_interna}
 En cuanto a la validez interna, relacionada con los posibles sesgos introducidos por la configuración del experimento, es necesario abordar la procedencia de los datos comparativos. Los resultados de los métodos de referencia (e.g., Mono2Micro, GTMicro) se extrajeron directamente de la literatura publicada para garantizar la fidelidad a los algoritmos originales de sus autores. No obstante, diferencias no reportadas en el preprocesamiento de los datos o en las versiones de las librerías subyacentes podrían afectar la equidad milimétrica de la comparación. Una validación definitiva requeriría la replicación completa de todos los \textit{baselines} bajo un entorno de ejecución idéntico.
 
 Por otra parte, la precisión de la extracción de datos enfrenta desafíos inherentes al análisis estático, particularmente en el manejo de características del lenguaje como el enlace dinámico y la reflexión. Para mitigar el ruido técnico derivado de estas limitaciones, MIDAS implementó en su primera fase un mecanismo de filtrado de \textit{Core Classes}, eliminando DTOs, excepciones y clases de utilidad triviales antes del procesamiento. Aunque esta decisión mejora la relación señal-ruido en la matriz estructural, conlleva el riesgo residual de haber excluido componentes que, a pesar de su pequeño tamaño o rol auxiliar, podrían poseer relevancia arquitectónica para la descomposición final.
 
-\subsubsection{Validez de Constructo}
+\subsection{Validez de Constructo}
 \label{subsubsec:validez_constructo}
 Finalmente, la validez de constructo cuestiona si las métricas empleadas cuantifican con precisión el concepto abstracto de "buena arquitectura". La amenaza más significativa radica en el uso de métricas como SM, ICP e IFN como \textit{proxies} matemáticos de calidad. El estudio asume que la optimización de estos valores se correlaciona con beneficios reales como la mantenibilidad, pero es posible obtener puntuaciones numéricas excelentes en una descomposición que, paradójicamente, falle en alinearse con los límites del contexto del negocio (\textit{Bounded Contexts}) o que imponga una alta carga cognitiva a los equipos de desarrollo. La validación completa de esta correlación requeriría evaluaciones cualitativas complementarias basadas en el juicio de expertos humanos.
 
