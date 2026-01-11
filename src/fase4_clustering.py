@@ -15,6 +15,9 @@ import pandas as pd
 import json
 import numpy as np
 import warnings
+import matplotlib.pyplot as plt
+import networkx as nx
+from adjustText import adjust_text
 from sklearn.cluster import SpectralClustering
 from sklearn.metrics import silhouette_score, calinski_harabasz_score
 
@@ -115,6 +118,82 @@ class SpectralClusterer:
 
         with open(output_json_path, 'w', encoding='utf-8') as f:
             json.dump(clusters, f, indent=4)
+    
+    def generate_cluster_graph(self, k, output_path):
+        """
+        Genera y guarda un gráfico de red con etiquetas optimizadas para no solaparse.
+        """
+        try:
+            from adjustText import adjust_text
+        except ImportError:
+            print("Error: Necesitas instalar la librería 'adjustText'. Ejecuta: pip install adjustText")
+            return
+
+        print(f"[Visualización] Generando gráfico para K={k}...")
+        
+        if self.current_k != k:
+            self.run_for_k(k)
+        
+        G = nx.Graph()
+        for i, name in enumerate(self.class_names):
+            G.add_node(name, group=self.labels[i])
+            
+        rows, cols = np.where(self.similarity_matrix > 0.05)
+        for r, c in zip(rows, cols):
+            if r < c:
+                weight = self.similarity_matrix[r, c]
+                G.add_edge(self.class_names[r], self.class_names[c], weight=weight)
+
+        plt.figure(figsize=(16, 14)) 
+        
+        # Aumentamos 'k' (distancia óptima entre nodos) para separarlos más
+        pos = nx.spring_layout(G, seed=42, k=0.3, iterations=100)
+        
+        cmap = plt.get_cmap('tab10')
+        node_colors = [cmap(self.labels[i]) for i in range(self.n)]
+        
+        # 1. Dibujar Aristas
+        edges = G.edges(data=True)
+        weights = [d['weight'] * 3 for u, v, d in edges] 
+        nx.draw_networkx_edges(G, pos, alpha=1.0, width=weights, edge_color='gray')
+        
+        # 2. Dibujar Nodos
+        nx.draw_networkx_nodes(
+            G, 
+            pos, 
+            node_size=700, 
+            node_color=node_colors, 
+            alpha=0.9, 
+            edgecolors='black'
+        )
+        
+        # 3. Dibujar Etiquetas 
+        texts = []
+        for node, (x, y) in pos.items():
+            # Creamos el objeto texto manualmente
+            t = plt.text(
+                x, y, 
+                node, 
+                fontsize=12, 
+                fontweight='bold', 
+                fontfamily='sans-serif'
+            )
+            texts.append(t)
+        
+        adjust_text(
+            texts, 
+            arrowprops=dict(arrowstyle='-', color='gray', lw=0.5), # Dibuja una línea si se aleja mucho
+            force_text=0.5,
+            expand_points=(1.3, 1.3) # Expande el área alrededor de nodos y textos
+        )
+
+        plt.title(f'Grafo de Dependencias (K={k})', fontsize=16)
+        plt.axis('off')
+        
+        plt.tight_layout()
+        plt.savefig(output_path, dpi=100, bbox_inches='tight')
+        plt.close()
+        print(f"[Visualización] Gráfico guardado en: {output_path}")
 
 
 def main():
@@ -175,6 +254,10 @@ def main():
         print(scores_df.sort_values(by='calinski_harabasz_score', ascending=False).head(5).to_string(index=False))
     else:
         print("No se generaron puntajes (quizás N < 3).")
+
+    # TARGET_K = 6
+    # graph_output = os.path.join(output_dir, f"visualization_graph_k{TARGET_K}.png")
+    # clusterer.generate_cluster_graph(k=TARGET_K, output_path=graph_output)
 
 if __name__ == '__main__':
     main()
