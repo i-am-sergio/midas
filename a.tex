@@ -1,0 +1,202 @@
+\chapter{Propuesta}
+\hrule \bigskip \vspace*{1cm}
+
+La presente investigación propone un enfoque denominado MIDAS (\textit{Multi-view Integrated Decomposition Approach with Semantic weighting}), que aborda el problema de la descomposición automática de sistemas monolíticos en microservicios. MIDAS considera la complejidad inherente de los sistemas legados y busca preservar la semántica y coherencia funcional del sistema original.
+
+A diferencia de enfoques previos centrados en una única fuente de información, MIDAS integra de forma conjunta tres vistas complementarias:  
+(i) la vista estructural, obtenida mediante análisis estático del código;  
+(ii) la vista semántica, basada en representaciones enriquecidas mediante Code Summarization con LLMs y embeddings profundos; y  
+(iii) la vista funcional, derivada de las especificaciones \textit{OpenAPI} y la deducción de escenarios de negocio asistida por LLMs. 
+
+Esta integración multivista captura dependencias técnicas, semánticas y funcionales, que se combinan mediante fusión ponderada y son analizadas mediante clustering espectral para extraer microservicios cohesivos y desacoplados.
+
+MIDAS se fundamenta en tres principios:  
+(1) considerar múltiples vistas complementarias del sistema,  
+(2) enriquecer dichas vistas mediante representaciones semánticas profundas generadas con modelos basados en \textit{transformers} (MPNet), y  
+(3) aplicar un mecanismo de fusión adaptativa que integre la información multivista para obtener una partición coherente, equilibrada y alineada con los principios de los microservicios.\\
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{imgs/Pipeline.png}
+    \caption{Pipeline de la propuesta}
+    \label{fig:pipeline}
+\end{figure}
+
+
+El enfoque MIDAS se estructura operativamente en un flujo de trabajo secuencial de cinco etapas, tal como se ilustra en la Figura~\ref{fig:pipeline}. El proceso inicia con la Extracción de Datos desde los artefactos del monolito, seguida por el Preprocesamiento y Normalización de las tres vistas generadas. Posteriormente, se ejecuta la Fusión Multivista Ponderada para integrar las perspectivas en un modelo unificado, lo que habilita la fase de Clustering Espectral para la identificación de candidatos a servicios. Finalmente, el ciclo concluye con la Evaluación de Calidad de la descomposición resultante, asegurando que la arquitectura propuesta cumpla con métricas de cohesión y acoplamiento.
+
+
+
+\section{Fase 1: Extracción de Datos}
+
+Esta fase inicial se enfoca en la obtención y segregación de los datos crudos a partir de las fuentes primarias del sistema monolítico. El objetivo fundamental es construir tres perspectivas complementarias (estructural, semántica y funcional) que estén perfectamente alineadas; es decir, que operen sobre el mismo subconjunto de "Clases Núcleo" (\textit{Core Classes}) filtradas, pero caracterizándolas con diferentes atributos y relaciones. Para lograr esto en ausencia de documentación formal en los datasets evaluados, se emplean herramientas de \textit{parsing} especializadas combinadas con inferencia mediante LLM \footnote{Large Language Models}.
+
+\subsection{Vista Estructural: Extracción Basada en Heurísticas de Acoplamiento}
+El propósito de esta vista es capturar las dependencias físicas y técnicas del sistema. El proceso toma como entrada el código fuente y utiliza un extractor de análisis estático desarrollado en Python que recorre el proyecto sin necesidad de compilación. Para cuantificar la fuerza del acoplamiento entre las clases, se implementó una heurística de puntuación específica que asigna pesos a las relaciones detectadas según su impacto arquitectónico. Las relaciones de Herencia (\textit{Inheritance}) reciben el peso máximo de 15 puntos, seguidas por la Instanciación de objetos con 8 puntos, el Acceso a Atributos con 5 puntos y, finalmente, las referencias en Firmas de Métodos con 3 puntos. El resultado es una matriz de adyacencia ponderada que define la topología técnica del grafo, conectando las clases núcleo basándose puramente en la intensidad de sus enlaces sintácticos.
+
+\subsection{Vista Semántica: Inferencia de Entidades de Dominio con LLM}
+Dado que los identificadores de código (nombres de clases) a menudo contienen ruido técnico (e.g., \textit{impl}, \textit{dao}, \textit{service}), esta perspectiva busca extraer el significado real del negocio que subyace a cada componente. Para ello, se emplea el modelo \textit{Google Gemini 2.5 Flash} actuando como un experto en Diseño Guiado por el Dominio (DDD). A través de un \textit{prompt} diseñado con ingeniería de reintentos robustos, se instruye al modelo para ignorar los detalles de infraestructura (como SQL o lógica de conexión) y centrarse exclusivamente en identificar el concepto de negocio del mundo real que la clase representa. Por ejemplo, el modelo deduce que una clase técnica llamada \textit{AccountDaoImpl} representa simplemente la entidad \textit{Account}. Esta abstracción genera descripciones textuales limpias y alineadas con el lenguaje ubicuo del dominio, las cuales son posteriormente vectorizadas.
+
+\subsection{Vista Funcional: Deducción de Escenarios de Negocio}
+Finalmente, la vista funcional tiene como objetivo agrupar los componentes según los procesos de negocio en los que participan, promoviendo un corte vertical (\textit{Vertical Slicing}) del sistema. Ante la ausencia de especificaciones OpenAPI en los datasets analizados, se optó por un enfoque inferencial utilizando nuevamente \textit{Google Gemini 2.5 Flash}. En esta instancia, el modelo analiza las clases controladoras y sus dependencias con un \textit{prompt} distinto, enfocado en el comportamiento funcional. El LLM deduce los casos de uso o flujos funcionales (como "Proceso de Checkout" o "Gestión de Inventario") a los que contribuye cada clase. El resultado es una estructura que asocia cada una de las clases del núcleo con etiquetas de escenarios funcionales específicos, permitiendo agrupar componentes que, aunque no tengan una fuerte conexión estructural directa, colaboran para satisfacer una misma funcionalidad de usuario.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{imgs/fase1_extraction.png}
+    \caption{Flujo de la Fase 1. Se observa la generación paralela de las tres vistas (Estructural, Semántica, Funcional) asegurando la alineación sobre un mismo conjunto de Clases Filtradas.}
+    \label{fig:fase1_extraction}
+\end{figure}
+
+El flujo de trabajo integrado se resume en la Figura \ref{fig:fase1_extraction}. Es crucial notar que, aunque los extractores operan con lógicas diferentes (heurística de pesos para la estructura, inferencia de entidades DDD para la semántica y deducción de casos de uso para la funcional), todos convergen en una lista unificada de clases. Esto garantiza la coherencia matemática en las fases subsiguientes, asegurando que las matrices resultantes puedan ser fusionadas sin discrepancias dimensionales.
+
+
+
+
+
+
+
+
+
+
+\section{Fase 2: Preprocesamiento de Datos y Normalización de Vistas}
+Esta fase toma como entrada los conjuntos de datos estructurados provenientes de la etapa anterior y los somete a un proceso de formalización matemática. El objetivo primordial es transformar las descripciones cualitativas (resúmenes semánticos y etiquetas funcionales) y las métricas cuantitativas (puntuaciones de acoplamiento) en matrices numéricas homogeneizadas y normalizadas. Esto garantiza que las tres vistas, estructural, semántica y funcional, sean algebraicamente compatibles para la fusión subsiguiente, asegurando que todas compartan el mismo espacio de nodos (Clases) y operen bajo rangos de valores normalizados en el intervalo unitario. El flujo de trabajo de esta fase se ilustra en la Figura \ref{fig:fase2_preprocessing}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1.0\linewidth]{imgs/fase2_preprocessing_matrix.png}
+    \caption{Flujo de trabajo de la Fase 2: Preprocesamiento y Normalización. Se ilustra la transformación paralela de los datos crudos mediante técnicas de normalización Min-Max (vista estructural) y cálculo de similitud coseno sobre embeddings generados por MPNet, convergiendo en tres matrices homogeneizadas en el rango $[0, 1]$.}
+    \label{fig:fase2_preprocessing}
+\end{figure}
+
+
+\subsection{Preprocesamiento de la Vista Estructural}
+Para la perspectiva estructural, la formalización consiste en convertir el listado de dependencias ponderadas en una matriz de adyacencia cuadrada. En esta matriz, cada entrada cuantifica la intensidad de la relación técnica entre pares de clases. Este modelo respeta las puntuaciones heurísticas calculadas en la Fase 1, donde relaciones fuertes como la herencia o la instanciación aportan un peso mayor (15 y 8 puntos respectivamente) que relaciones débiles como el uso de atributos (5 puntos). Para evitar que estos valores de magnitud variable dominen artificialmente la fusión posterior, la matriz resultante se somete a una normalización Min-Max. Este proceso escala linealmente los pesos, de modo que la dependencia más fuerte del sistema tome el valor de 1 y la ausencia de relación el valor de 0, preservando las proporciones relativas del acoplamiento.
+
+\subsection{Preprocesamiento y Generación de Similitud Semántica}
+El procesamiento de la información semántica toma como entrada los resúmenes de dominio generados por el LLM en la fase previa. Aunque estos textos ya están depurados de ruido sintáctico, se aplica la conversión a minúsculas y la eliminación de caracteres no alfanuméricos para estandarizar la entrada. A continuación, estos textos enriquecidos se utilizan como entrada para el modelo MPNet. Este modelo basado en transformers convierte cada descripción funcional en un vector de embedding denso de alta dimensión que captura el significado contextual profundo de la clase dentro del negocio. Finalmente, la matriz de similitud semántica se construye calculando la similitud coseno entre los vectores de cada par de clases. Esta métrica es ideal pues mide la orientación semántica de los vectores independientemente de su magnitud, garantizando intrínsecamente que los valores de similitud se encuentren acotados en el rango deseado de cero a uno:
+
+\begin{equation}
+    S_{i,j}^{(sem)} = \frac{e_i \cdot e_j}{|e_i| |e_j|}
+\end{equation}
+
+\subsection{Preprocesamiento y Generación de Similitud Funcional}
+
+La construcción de la vista funcional se adapta a la naturaleza inferida de los datos obtenidos en la Fase 1, donde los componentes del sistema han sido etiquetados con Escenarios de Negocio deducidos por el LLM. Dado que estas etiquetas (e.g., "Gestión de Inventario", "Procesamiento de Pagos") constituyen descripciones textuales del comportamiento del sistema, el procesamiento sigue un enfoque vectorial para cuantificar la afinidad entre clases.
+
+El proceso inicia consolidando todas las etiquetas de escenarios asociadas a una clase específica en una única cadena de texto que define su perfil funcional. Esta descripción agregada es transformada en un vector de embedding funcional $f_i \in \mathbb{R}^d$ utilizando el modelo MPNet, lo que permite proyectar los procesos de negocio en un espacio semántico continuo. Posteriormente, la matriz de similitud funcional $A^{(fun)}$ se construye calculando la similitud coseno entre los vectores de perfil funcional de cada par de clases ($C_i, C_j$). Esto permite detectar grados de afinidad entre clases que participan en flujos de negocio semánticamente cercanos, generando una matriz cuyos valores están intrínsecamente normalizados en el rango $[0, 1]$. De esta forma, se obtiene una representación matemática que cuantifica qué tan alineado está el propósito funcional de dos componentes, sirviendo como la tercera entrada compatible para el algoritmo de fusión.
+
+\begin{equation}
+    A_{i,j}^{(fun)} = \frac{f_i \cdot f_j}{\|f_i\| \|f_j\|}
+\end{equation}
+
+
+
+
+
+
+\section{Fase 3: Fusión Multivista Ponderada}
+
+El propósito fundamental de esta fase es sintetizar las tres perspectivas normalizadas obtenidas en la etapa previa —la matriz de adyacencia estructural, la matriz de similitud semántica y la matriz de similitud funcional— en un único modelo unificado. Esta integración busca superar las limitaciones de los enfoques que dependen de una sola fuente de información o de parámetros manuales subjetivos, implementando un esquema de fusión que determina automáticamente la importancia relativa de cada vista basándose en su calidad intrínseca y coherencia espectral.
+
+La entrada para este proceso consiste en las tres matrices ($A^{(str)}$, $S^{(sem)}$, $A^{(fun)}$), todas definidas sobre el mismo conjunto de nodos (clases del sistema) y normalizadas en el rango $[0, 1]$. La integración se formaliza mediante una combinación lineal, donde la matriz unificada ($U$) se calcula como la suma ponderada de las matrices de entrada. Para la formulación matemática general, denotaremos indistintamente a cualquiera de estas matrices como $A^{(v)}$, donde a cada vista $v$ se le asigna un coeficiente $w_v$ que modula su contribución al modelo final (Ecuación \ref{eq:fusion-lineal}). Para garantizar que la topología resultante se mantenga dentro de una escala probabilística válida, los pesos están sujetos a restricciones de convexidad, requiriendo que sean no negativos y que su suma sea igual a la unidad (Ecuación \ref{eq:restricciones-peso}).
+
+\begin{equation}
+    U = \sum_{v=1}^{3} w_v\, A^{(v)}
+    \label{eq:fusión-lineal}
+\end{equation}
+
+\begin{equation}
+    \sum_{v=1}^{3} w_v = 1 \quad \text{y} \quad w_v \ge 0
+    \label{eq:restricciones-peso}
+\end{equation}
+
+A diferencia de los métodos estáticos, en esta propuesta los pesos $w_v$ son variables dinámicas que se aprenden mediante un proceso de optimización iterativa conocido como fusión auto-ponderada. La lógica subyacente de este algoritmo se basa en la teoría del consenso espectral. El modelo asume que existe una estructura latente "verdadera" de los microservicios y que las vistas más fiables son aquellas cuyos autovectores (que describen los clústeres naturales) se alinean mejor con esta estructura común. Por el contrario, las vistas que contienen ruido o dependencias espurias discreparán del consenso. En consecuencia, el algoritmo busca minimizar el desacuerdo global iterando entre dos pasos: calcular una matriz de consenso basada en los pesos actuales y, posteriormente, actualizar dichos pesos penalizando a las vistas que presentan una mayor divergencia (o pérdida) respecto al consenso calculado.
+
+Este mecanismo adaptativo garantiza que la influencia de cada perspectiva esté balanceada por su coherencia interna. Matemáticamente, esto se logra actualizando los pesos mediante una función exponencial inversa del error calculado, lo que reduce drásticamente la contribución de las vistas ruidosas y prioriza aquellas que ofrecen una señal de agrupación clara. El procedimiento computacional detallado, que incluye el cálculo de los laplacianos normalizados y la actualización de los coeficientes, se presenta formalmente en el Algoritmo \ref{alg:multiview_fusion}. El resultado final de este proceso es la matriz de similitud unificada ($U$), una representación optimizada que integra las dependencias estructurales, la afinidad semántica y la cohesión funcional, sirviendo como la entrada definitiva y robusta para la fase subsiguiente de clustering.
+
+\begin{algorithm}[H]
+\caption{Fusión Multivista Auto-Ponderada}
+\label{alg:multiview_fusion}
+\linespread{1.0}\selectfont 
+\begin{algorithmic}[1]
+\Require Matrices de entrada $\{\mathbf{A}^{(v)}\}_{v=1}^{V}$ donde $V=3$ (Estructural, Semántica, Funcional), número de clústeres $k$, parámetro de nitidez $\gamma$.
+\Ensure Matriz Unificada $\mathbf{U}$, Pesos de vista finales $\mathbf{w}$.
+
+\State \textit{Inicializar:} $V \leftarrow 3$; $\mathbf{w} \leftarrow [\frac{1}{V}, \dots, \frac{1}{V}]$
+\State Calcular Laplacianos Normalizados: $\mathbf{L}^{(v)} = \mathbf{I} - (\mathbf{D}^{(v)})^{-\frac{1}{2}} \mathbf{A}^{(v)} (\mathbf{D}^{(v)})^{-\frac{1}{2}}$
+
+\Repeat
+    \State \textit{Paso 1: Fusión Lineal}
+    \State $\mathbf{U} \leftarrow \sum_{v=1}^{V} w_v \mathbf{A}^{(v)}$
+    
+    \State \textit{Paso 2: Consenso Espectral}
+    \State Calcular Laplaciano de U: $\mathbf{L}_{\mathbf{U}} \leftarrow \mathbf{I} - \mathbf{D}_{\mathbf{U}}^{-\frac{1}{2}} \mathbf{U} \mathbf{D}_{\mathbf{U}}^{-\frac{1}{2}}$
+    \State Resolver $(\mathbf{L}_{\mathbf{U}}) \mathbf{H} = \mathbf{H} \Lambda$ para obtener $\mathbf{H} \in \mathbb{R}^{n \times k}$
+    \State (H contiene los $k$ autovectores asociados a los autovalores más pequeños)
+    
+    \State \textit{Paso 3: Evaluación de Desacuerdo (Loss)}
+    \For{$v \leftarrow 1$ \textbf{to} $V$}
+        \State $\mathcal{L}_v \leftarrow \text{Tr}(\mathbf{H}^\top \mathbf{L}^{(v)} \mathbf{H})$
+    \EndFor
+    
+    \State \textit{Paso 4: Actualización de Pesos}
+    \State $\exp\_vals_v \leftarrow \exp(-\gamma (\mathcal{L}_v - \min(\mathcal{L})))$
+    \State $w_v \leftarrow \frac{\exp\_vals_v}{\sum_{j=1}^{V} \exp\_vals_j}$
+    
+\Until{convergencia de $\mathbf{w}$}
+
+\State \Return $\mathbf{U}, \mathbf{w}$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+
+\section{Fase 4: Clustering Espectral y Extracción de Microservicios}
+
+Esta etapa del proceso tiene como objetivo primordial la partición efectiva de las clases del monolito en grupos cohesivos que representen candidatos a microservicios. Para ello, se toma como entrada la matriz de similitud unificada ($U$) generada en la fase anterior, la cual constituye una representación sintética y balanceada de las dependencias estructurales, la afinidad semántica y la cohesión funcional del sistema.
+
+La estrategia de particionamiento se fundamenta en el algoritmo de clustering espectral, seleccionado por su capacidad superior para detectar estructuras de comunidades en grafos que no son linealmente separables, una característica frecuente en las arquitecturas de software complejas. El procedimiento computacional inicia con la transformación de la matriz de similitud $U$ en su correspondiente matriz Laplaciana Normalizada ($L_{sym}$). Esta matriz es fundamental pues sus propiedades espectrales codifican la conectividad global del grafo y permiten relajar el problema de corte de grafos (NP-hard) a un problema de álgebra lineal soluble.
+
+Posteriormente, se realiza una descomposición de valores propios para extraer los $k$ autovectores correspondientes a los $k$ autovalores más pequeños. Estos autovectores conforman una matriz de incrustación que actúa como un sistema de coordenadas latentes, proyectando las clases originales a un nuevo espacio vectorial de baja dimensión donde los clústeres naturales se vuelven geométricamente evidentes. Finalmente, se aplica el algoritmo k-Means estándar sobre las filas de esta matriz proyectada para asignar cada clase a un grupo específico.
+
+Un aspecto crítico en esta metodología es la determinación del número óptimo de microservicios ($k$), el cual no se impone mediante parámetros arbitrarios. En su lugar, el enfoque implementa un mecanismo de evaluación automática que explora iterativamente un rango de búsqueda predefinido. Para cada configuración de $k$, se calcula el coeficiente de Silhouette, una métrica que cuantifica la calidad de la agrupación midiendo simultáneamente la cohesión interna de cada clúster y su separación respecto a los demás. El valor de $k$ que maximiza este coeficiente es seleccionado automáticamente como el óptimo, asegurando así que la granularidad de la descomposición responda a la estructura intrínseca de los datos y no al sesgo del arquitecto.
+
+Como resultado, se obtiene la descomposición candidata del monolito. Esta salida consiste en una asignación discreta donde cada clase del sistema original pertenece a uno de los $k$ clústeres identificados. Estos grupos representan los microservicios sugeridos, formados por componentes que han demostrado tener una alta afinidad multidimensional, cumpliendo así con los principios de alta cohesión interna y bajo acoplamiento externo necesarios para una arquitectura de microservicios viable.
+
+
+Como resultado, se obtiene la descomposición candidata del monolito. Esta salida consiste en una asignación discreta donde cada clase del sistema original pertenece a uno de los $k$ clústeres identificados, tal como se ejemplifica en la Figura~\ref{fig:fase4_result} para el caso del monolito \textit{Plants}. En dicha figura se puede observar la estructura final en formato JSON, donde componentes funcionalmente relacionados (como \textit{Customer} y \textit{AccountBean} en el Cluster 5) han sido agrupados exitosamente. Estos grupos representan los microservicios sugeridos, formados por componentes que han demostrado tener una alta afinidad multidimensional, que seran evaluados en la siguiente fase.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{imgs/fase4_result.png}
+    \caption{Ejemplo de la salida de la Fase 4 correspondiente al dataset \textit{Plants}. El archivo JSON muestra la partición final del sistema en 6 microservicios candidatos ($k=6$), detallando las clases específicas asignadas a cada clúster.}
+    \label{fig:fase4_result}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+\section{Fase 5: Evaluación de la Calidad de la Descomposición}
+
+La viabilidad técnica de la arquitectura propuesta se valida mediante un conjunto de cuatro métricas estándar en la literatura de modernización de software en microservicios \cite{s1_saucedo2025migration, s2_mohottige2025reengineering}. Estas medidas permiten cuantificar objetivamente las propiedades de cohesión, acoplamiento y equilibrio de la partición resultante.
+
+En primer lugar, se emplea la \textbf{Modularidad Estructural (SM)} para evaluar la cohesión interna. Esta métrica compara la densidad de conexiones intra-clúster frente a las inter-clúster; un valor elevado confirma que el algoritmo ha encapsulado exitosamente clases que colaboran intensamente, cumpliendo con el principio de responsabilidad única.
+
+Para medir el acoplamiento, se utilizan dos indicadores complementarios:
+\begin{itemize}
+    \item El \textbf{Porcentaje de Llamadas Inter-servicios (ICP)} analiza el acoplamiento dinámico calculando la proporción de invocaciones que cruzan los límites del microservicio. Minimizar este valor es crucial para reducir la latencia de red y mejorar la independencia del despliegue.
+    \item El \textbf{Número de Interfaces (IFN)} evalúa la complejidad estática contabilizando los métodos expuestos que son consumidos por otros servicios. Un índice reducido implica una menor superficie de contacto, lo que facilita el mantenimiento y reduce la fragilidad de las interacciones distribuidas.
+\end{itemize}
+
+Finalmente, la métrica de \textbf{Distribución No Extrema (NED)} examina el equilibrio granular de la solución. Esta medida penaliza las desviaciones de tamaño desproporcionadas, evitando tanto la formación de grandes monolitos distribuidos ("God Classes") como la proliferación de componentes triviales ("Nano-services"). Un valor alto de NED garantiza una arquitectura balanceada donde la carga funcional se distribuye uniformemente entre los servicios.

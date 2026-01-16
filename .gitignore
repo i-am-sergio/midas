@@ -109,8 +109,8 @@ v3/extract_functional_view
 v3/extract_semantic_view
 v3/filter
 
-**/jpetstore_results/**
-**/acmeair_results/**
-**/daytrader_results/**
-**/plants_results/**
-**/jrideconnect_results/**
+**/jpetstore_results**
+**/acmeair_results**
+**/daytrader_results**
+**/plants_results**
+**/jrideconnect_results**
