@@ -121,7 +121,7 @@ class MultiViewFusion:
             # PASO 4: Actualizar Pesos
             # Usamos una función exponencial inversa para penalizar losses altos.
             # Exponente gamma > 1 agudiza la selección (hace al algoritmo más "exigente")
-            gamma = 0.5 # 2.0
+            gamma = 1.5 # 2.0
             
             # Evitar overflow numérico restando el mínimo
             exp_vals = np.exp(-gamma * (view_losses - np.min(view_losses)))
