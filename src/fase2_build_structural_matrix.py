@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# fase2_build_structural_matrix.py
 
 """
 FASE 2.1: Construcción de la Matriz Estructural (A_str).
@@ -83,6 +83,19 @@ class StructuralMatrixBuilder:
             normalized_matrix = symmetric_matrix / max_val
         else:
             normalized_matrix = symmetric_matrix
+
+        # 3. FILTRADO DE CONEXIONES DÉBILES (Noise Reduction)
+        # Esto ayuda a romper el efecto "God Class" y aislar utilidades.
+        prev_edges = np.count_nonzero(normalized_matrix)
+        WEAK_LINK_THRESHOLD = 0.1
+        normalized_matrix[normalized_matrix < WEAK_LINK_THRESHOLD] = 0
+        
+        curr_edges = np.count_nonzero(normalized_matrix)
+        removed = prev_edges - curr_edges
+        
+        if removed > 0:
+            print(f"   Se eliminaron {removed} conexiones débiles (Threshold < {WEAK_LINK_THRESHOLD}).")
+            print(f"   Conexiones restantes: {curr_edges}")
 
         # Asegurar diagonal en 0 (una clase no se 'depende' de sí misma para clustering)
         # Nota: En vista semántica la diagonal es 1. En estructural suele ser 0.

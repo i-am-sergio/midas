@@ -93,6 +93,19 @@ class FunctionalMatrixBuilder:
         print("[Functional] Calculando Similitud Coseno...")
         
         similarity_matrix = cosine_similarity(embeddings)
+
+        # 3. FILTRADO DE CONEXIONES DÉBILES (Noise Reduction)
+        # Esto ayuda a romper el efecto "God Class" y aislar utilidades.
+        prev_edges = np.count_nonzero(similarity_matrix)
+        WEAK_LINK_THRESHOLD = 0.15
+        similarity_matrix[similarity_matrix < WEAK_LINK_THRESHOLD] = 0
+        
+        curr_edges = np.count_nonzero(similarity_matrix)
+        removed = prev_edges - curr_edges
+        
+        if removed > 0:
+            print(f"   Se eliminaron {removed} conexiones débiles (Threshold < {WEAK_LINK_THRESHOLD}).")
+            print(f"   Conexiones restantes: {curr_edges}")
         
         # Diagonal = 1.0
         np.fill_diagonal(similarity_matrix, 1.0)
